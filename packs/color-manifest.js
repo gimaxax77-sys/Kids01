@@ -57,17 +57,5 @@ window.COLOR_PAGES = {
   "color-pages/사물/strawberry.svg",
   "color-pages/사물/tree.svg",
   "color-pages/사물/watermelon.svg"
- ],
- "캐릭터": [
-  "color-pages/캐릭터/alien.svg",
-  "color-pages/캐릭터/elf.svg",
-  "color-pages/캐릭터/fairy.svg",
-  "color-pages/캐릭터/ghost.svg",
-  "color-pages/캐릭터/prince.svg",
-  "color-pages/캐릭터/princess.svg",
-  "color-pages/캐릭터/robot.svg",
-  "color-pages/캐릭터/superhero.svg",
-  "color-pages/캐릭터/supervillain.svg",
-  "color-pages/캐릭터/zombie.svg"
  ]
 };

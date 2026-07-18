@@ -33,6 +33,13 @@
   #tools button { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.5cm; height:1.5cm; max-width:12vw; max-height:8vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
   #tools button:active { transform:scale(.9); }
 
+  /* 캐릭터 개인 업로드: 빈 화면 안내 + 추가/비우기 */
+  #picknote { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:4vw; color:#9a8c6a; font-size:4.5vw; }
+  #pickbig { border:none; background:#ffd54f; color:#5b4a1a; font-weight:bold; font-size:5.5vw; padding:3.5vw 7vw; border-radius:18px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.2); }
+  #pickbig:active { transform:scale(.95); }
+  #charctl { position:fixed; left:calc(3vw + env(safe-area-inset-left)); bottom:calc(15vh + env(safe-area-inset-bottom)); z-index:30; display:none; gap:2vw; }
+  #charctl button { border:none; border-radius:50%; cursor:pointer; width:1.4cm; height:1.4cm; max-width:11vw; max-height:6.5vh; font-size:5vw; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+
   /* 그림 고르기 오버레이 */
   #gallery { position:fixed; inset:0; z-index:100; background:rgba(30,24,14,.6); display:none; flex-direction:column; }
   #gallery.open { display:flex; }
@@ -59,16 +66,31 @@
   <div id="palette"></div>
 </div>
 <div id="gallery"><div class="ghead"><div class="gclose">✕</div></div><div class="ggrid"></div></div>
+<input id="filepick" type="file" multiple hidden>
+<div id="charctl"><button id="charadd" aria-label="사진 추가">＋</button><button id="charclear" aria-label="사진 비우기">🗑</button></div>
 
 <script src="packs/color-manifest.js"></script>
 <script>
 const P = window.COLOR_PAGES || {};
+const CHAR = 3; // 캐릭터 = 개인 업로드(퍼즐과 저장 공유)
 const THEMES = [
   { id:'공룡', icon:'🦕', files:P['공룡']||[] },
   { id:'자동차', icon:'🚗', files:P['자동차']||[] },
   { id:'사물', icon:'⚽', files:P['사물']||[] },
-  { id:'캐릭터', icon:'🦸', files:P['캐릭터']||[] },
+  { id:'캐릭터', icon:'🦸', files:[] }, // 아래에서 업로드분 채움
 ];
+// 개인 업로드 이미지: 브라우저(localStorage)에만 저장(퍼즐과 공유), 업로드·배포 없음
+function loadChars(){ try { return JSON.parse(localStorage.getItem('charImages')||'[]'); } catch(e){ return []; } }
+function saveChars(a){ try { localStorage.setItem('charImages', JSON.stringify(a)); } catch(e){} }
+THEMES[CHAR].files = loadChars();
+function addFiles(list){
+  const files=[...list]; if(!files.length) return;
+  let pending=files.length; const added=[];
+  const done=()=>{ if(--pending===0) finish(); };
+  files.forEach(f=>{ const rd=new FileReader(); rd.onload=()=>{ const im=new Image(); im.onload=()=>{added.push(rd.result);done();}; im.onerror=done; im.src=rd.result; }; rd.onerror=done; rd.readAsDataURL(f); });
+  function finish(){ if(!added.length) return; THEMES[CHAR].files=THEMES[CHAR].files.concat(added); saveChars(THEMES[CHAR].files); picIdx=0; if(themeIdx===CHAR) loadPage(); ping(); }
+}
+function clearChars(){ THEMES[CHAR].files=[]; saveChars([]); picIdx=0; if(themeIdx===CHAR) loadPage(); }
 const COLORS = ['#e23b3b','#ef7d1a','#f5c518','#3fae54','#4aa3df','#3b7de2','#9b4fd0','#ec5a92','#8d6e63','#333333','#ffffff'];
 let current = COLORS[0], themeIdx = 0, picIdx = 0;
 const RES = 560;
@@ -91,15 +113,26 @@ function clearPaint(){ pctx.fillStyle = '#ffffff'; pctx.fillRect(0,0,RES,RES); }
 // 선그림 로드: width/height 주입해 blob으로(위 레이어 img)
 async function loadPage(){
   const files = THEMES[themeIdx].files;
-  fitBox(); clearPaint();
-  if(!files.length){ lines.removeAttribute('src'); return; }
+  fitBox(); clearPaint(); updateCharCtl(); removePickNote();
+  if(!files.length){ lines.removeAttribute('src'); if(themeIdx===CHAR) showPickNote(); return; }
   const src = files[picIdx % files.length];
+  if(src.startsWith('data:')){ lines.src = src; return; } // 업로드 이미지는 그대로 위 레이어로
   try {
     let txt = await (await fetch(src)).text();
     if(!/<svg[^>]*\swidth=/.test(txt)) txt = txt.replace('<svg', '<svg width="'+RES+'" height="'+RES+'"');
     lines.src = URL.createObjectURL(new Blob([txt], {type:'image/svg+xml'}));
   } catch(e) {}
 }
+function removePickNote(){ const n=document.getElementById('picknote'); if(n) n.remove(); }
+function showPickNote(){
+  removePickNote();
+  const n=document.createElement('div'); n.id='picknote';
+  n.innerHTML='<div>내 그림으로 색칠하기</div>';
+  const b=document.createElement('button'); b.id='pickbig'; b.textContent='🖼️ 사진 고르기';
+  b.onclick=()=>filepick.click(); n.appendChild(b);
+  document.getElementById('artwrap').appendChild(n);
+}
+function updateCharCtl(){ document.getElementById('charctl').style.display = (themeIdx===CHAR && THEMES[CHAR].files.length>0) ? 'flex' : 'none'; }
 
 // --- 문질러 칠하기 ---
 let drawing = false, last = null;
@@ -142,9 +175,16 @@ gallery.querySelector('.gclose').addEventListener('click', ()=> gallery.classLis
 gallery.addEventListener('click', (e)=>{ if(e.target===gallery || e.target.classList.contains('ggrid') || e.target.classList.contains('ghead')) gallery.classList.remove('open'); });
 document.getElementById('gallery-btn').addEventListener('click', ()=>{
   const files=THEMES[themeIdx].files; const grid=gallery.querySelector('.ggrid'); grid.innerHTML='';
+  if(!files.length){ if(themeIdx===CHAR) filepick.click(); return; }
   files.forEach((src,i)=>{ const im=document.createElement('img'); im.className='thumb'; im.loading='lazy'; im.src=src; im.addEventListener('click',()=>{ picIdx=i; gallery.classList.remove('open'); loadPage(); ping(); }); grid.appendChild(im); });
   gallery.classList.add('open'); ping();
 });
+
+// 캐릭터 개인 업로드 컨트롤
+const filepick = document.getElementById('filepick');
+filepick.addEventListener('change', (e)=>{ addFiles(e.target.files); filepick.value=''; });
+document.getElementById('charadd').addEventListener('click', ()=> filepick.click());
+document.getElementById('charclear').addEventListener('click', clearChars);
 
 window.addEventListener('resize', fitBox);
 

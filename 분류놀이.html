@@ -37,12 +37,12 @@
   #diff { position:fixed; left:50%; bottom:calc(1.6vh + env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; gap:3.5vw; }
   #diff button {
     border:none; background:#e6dcc4; border-radius:50%; cursor:pointer;
-    width:1.4cm; height:1.4cm; max-width:11vw; max-height:6.5vh;
-    display:flex; align-items:center; justify-content:center; gap:3px; padding:0;
+    width:1.4cm; height:1.4cm; max-width:12vw; max-height:6.5vh;
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center; align-content:center; gap:2.5px; padding:14%;
     box-shadow:0 2px 5px rgba(0,0,0,.15);
   }
   #diff button.on { background:#cdbd97; transform:scale(1.12); }
-  #diff button i { width:6px; height:6px; border-radius:50%; background:#6b5b39; display:block; }
+  #diff button i { width:22%; aspect-ratio:1; border-radius:50%; background:#6b5b39; display:block; }
 
   /* 좌상단 홈(놀이방으로) */
   #home {
@@ -69,9 +69,11 @@
 <a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
 <button id="mode" aria-label="모드">🎨</button>
 <div id="diff">
-  <button data-n="2" aria-label="쉬움"><i></i><i></i></button>
-  <button data-n="3" aria-label="보통"><i></i><i></i><i></i></button>
-  <button data-n="4" aria-label="어려움"><i></i><i></i><i></i><i></i></button>
+  <button data-n="2" aria-label="난이도2"><i></i><i></i></button>
+  <button data-n="3" aria-label="난이도3"><i></i><i></i><i></i></button>
+  <button data-n="4" aria-label="난이도4"><i></i><i></i><i></i><i></i></button>
+  <button data-n="5" aria-label="난이도5"><i></i><i></i><i></i><i></i><i></i></button>
+  <button data-n="6" aria-label="난이도6"><i></i><i></i><i></i><i></i><i></i><i></i></button>
 </div>
 
 <script>
@@ -80,12 +82,16 @@ const COLORS = [
   { key:'yellow', hex:'#f5c518' },
   { key:'blue',   hex:'#3b7de2' },
   { key:'green',  hex:'#3fae54' },
+  { key:'orange', hex:'#ef7d1a' },
+  { key:'purple', hex:'#9b4fd0' },
 ];
-const SHAPES = ['circle','square','triangle','star'];
+const SHAPES = ['circle','square','triangle','star','heart','hexagon'];
 const NEUTRAL = '#8a7bd8'; // 모양 모드일 때 색은 고정(속성 하나만 다르게)
+const MODES = ['color','shape','sand','liquid'];
+const MODE_ICON = { color:'🎨', shape:'🔷', sand:'🏖️', liquid:'💧' };
 
 const stage = document.getElementById('stage');
-let mode = 'color';   // 'color' | 'shape'
+let mode = 'color';   // color | shape | sand | liquid
 let catN = 3;         // 칸 수
 let bins = [];        // {key, el, cx, cy}
 let dragging = null;
@@ -98,8 +104,33 @@ function shapeSVG(shape, hex, size) {
     square: `<rect x="6" y="6" width="88" height="88" rx="14" fill="${hex}"/>`,
     triangle: `<polygon points="50,6 96,92 4,92" fill="${hex}"/>`,
     star: `<polygon points="50,4 61,38 97,38 68,60 79,95 50,72 21,95 32,60 3,38 39,38" fill="${hex}"/>`,
+    heart: `<path d="M50,88 C8,58 18,16 50,40 C82,16 92,58 50,88 Z" fill="${hex}"/>`,
+    hexagon: `<polygon points="50,6 90,28 90,72 50,94 10,72 10,28" fill="${hex}"/>`,
   };
   return `<svg width="${s}" height="${s}" viewBox="0 0 100 100">${shapes[shape]}</svg>`;
+}
+
+// 색상별 모래 더미
+function sandSVG(hex, s){
+  return `<svg width="${s}" height="${s}" viewBox="0 0 100 100">
+    <path d="M6,84 Q30,40 50,42 Q70,40 94,84 Z" fill="${hex}"/>
+    <circle cx="34" cy="68" r="3" fill="rgba(0,0,0,.16)"/><circle cx="56" cy="74" r="3" fill="rgba(0,0,0,.16)"/>
+    <circle cx="68" cy="64" r="3" fill="rgba(255,255,255,.4)"/><circle cx="45" cy="60" r="2.6" fill="rgba(255,255,255,.4)"/><circle cx="24" cy="78" r="2.4" fill="rgba(255,255,255,.3)"/></svg>`;
+}
+// 색상별 액체 방울
+function liquidSVG(hex, s){
+  return `<svg width="${s}" height="${s}" viewBox="0 0 100 100">
+    <path d="M50,8 C50,8 20,46 20,64 A30,30 0 0 0 80,64 C80,46 50,8 50,8 Z" fill="${hex}"/>
+    <ellipse cx="40" cy="60" rx="7" ry="13" fill="rgba(255,255,255,.45)"/></svg>`;
+}
+function catColor(key){ const c = COLORS.find(c=>c.key===key); return c ? c.hex : NEUTRAL; }
+// 모드별 아이템 그림
+function materialSVG(m, key, size){
+  if(m==='shape') return shapeSVG(key, NEUTRAL, size);
+  const hex = catColor(key);
+  if(m==='sand')   return sandSVG(hex, size);
+  if(m==='liquid') return liquidSVG(hex, size);
+  return shapeSVG('circle', hex, size);
 }
 
 // 창(innerWidth)이 아니라 stage 요소 크기를 기준으로 — 스냅샷 미리보기에서 0 되는 문제 회피
@@ -115,8 +146,8 @@ function deal() {
   stage.innerHTML = '';
   bins = [];
   const bs = binSize();
-  const cats = (mode === 'color' ? COLORS.slice(0, catN).map(c => c.key)
-                                  : SHAPES.slice(0, catN));
+  const cats = (mode === 'shape' ? SHAPES.slice(0, catN)
+                                  : COLORS.slice(0, catN).map(c => c.key));
   // 상단 칸(bin) 배치
   cats.forEach((key, i) => {
     const el = document.createElement('div');
@@ -127,16 +158,16 @@ function deal() {
     el.style.width = el.style.height = bs + 'px';
     el.style.left = (cx - bs/2) + 'px';
     el.style.top  = (cy - bs/2) + 'px';
-    // 칸 안내: 색 모드=색 테두리, 모양 모드=회색 윤곽 도형
-    if (mode === 'color') {
-      const hex = COLORS.find(c => c.key === key).hex;
-      el.style.background = hex + '22';
-      el.style.border = `4px dashed ${hex}`;
-      el.innerHTML = `<div class="target">${shapeSVG('circle', hex, bs*0.7)}</div>`;
-    } else {
+    // 칸 안내: 모양 모드=회색 윤곽, 그 외(색/모래/액체)=색 테두리+같은 재질
+    if (mode === 'shape') {
       el.style.background = '#00000008';
       el.style.border = '4px dashed #b3a789';
       el.innerHTML = `<div class="target">${shapeSVG(key, '#b3a789', bs*0.7)}</div>`;
+    } else {
+      const hex = catColor(key);
+      el.style.background = hex + '22';
+      el.style.border = `4px dashed ${hex}`;
+      el.innerHTML = `<div class="target">${materialSVG(mode, key, bs*0.7)}</div>`;
     }
     stage.appendChild(el);
     bins.push({ key, el, cx, cy });
@@ -161,11 +192,7 @@ function deal() {
     el.dataset.key = key;
     el.dataset.homeX = el.style.left;
     el.dataset.homeY = el.style.top;
-    if (mode === 'color') {
-      el.innerHTML = shapeSVG('circle', COLORS.find(c => c.key === key).hex, is);
-    } else {
-      el.innerHTML = shapeSVG(key, NEUTRAL, is);
-    }
+    el.innerHTML = materialSVG(mode, key, is);
     attachDrag(el);
     stage.appendChild(el);
   });
@@ -236,8 +263,8 @@ function win() {
 
 // --- 컨트롤 ---
 document.getElementById('mode').addEventListener('click', (e) => {
-  mode = (mode === 'color') ? 'shape' : 'color';
-  e.currentTarget.textContent = (mode === 'color') ? '🎨' : '🔷';
+  mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
+  e.currentTarget.textContent = MODE_ICON[mode];
   deal(); ping();
 });
 document.querySelectorAll('#diff button').forEach(btn => {

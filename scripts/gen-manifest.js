@@ -21,7 +21,7 @@ fs.writeFileSync(path.join(ROOT,'packs','puzzle-manifest.js'),
   '// 퍼즐 이미지 매니페스트 (scripts/gen-manifest.js 자동생성 - 직접수정 금지)\nwindow.PUZZLE_IMAGES = '+JSON.stringify(puzzle,null,1)+';\n','utf8');
 
 // 색칠(선그림, 캐릭터 포함=일반 캐릭터 아웃라인)
-const color = scan('color-pages', ['공룡','자동차','사물','캐릭터']);
+const color = scan('color-pages', ['공룡','자동차','사물']);
 fs.writeFileSync(path.join(ROOT,'packs','color-manifest.js'),
   '// 색칠 선그림 매니페스트 (scripts/gen-manifest.js 자동생성 - 직접수정 금지)\nwindow.COLOR_PAGES = '+JSON.stringify(color,null,1)+';\n','utf8');
 
