@@ -291,3 +291,13 @@ sort 게임 정보 조사·브리핑. (Gim 선택: 둘 다 = 유아 교육용 �
 - https://www.ungrammary.com/post/designing-for-kids-ux-design-tips-for-children-apps
 - https://apps.apple.com/us/app/sago-mini-world-kids-games/id874425722
 - https://playpokpok.com/
+
+### [2026-07-19] 5세 이상 장난감 아이디어 브리핑
+- 조사 — Khan/ABCmouse/Osmo/LogicLike/Thinkrolls/탱그램·미로·코딩(kids). 5~8세는 목표·도전형 학습 감당(자유탐색형과 다름).
+- 영역별 아이디어:
+  - 언어: 한글놀이(자모 따라쓰기+단어), 알파벳·파닉스, 낱말 만들기
+  - 수학: 덧셈뺄셈, 패턴 잇기, 크기 순서, 시계·돈
+  - 논리/컴퓨팅: 코딩(화살표 시퀀싱), 미로, 탱그램, 그림 스도쿠
+  - 관찰: 틀린그림찾기, 순서 맞추기
+- 추천 우선순위 5 — 1)코딩놀이(★★ 트렌드) 2)한글놀이(따라쓰기 엔진 재사용) 3)덧셈뺄셈(숫자놀이 확장) 4)패턴잇기 5)미로(캔버스 재사용).
+- 다음: Gim이 제작 대상 선택 대기.
