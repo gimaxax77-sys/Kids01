@@ -1,0 +1,65 @@
+<!-- 유아 자유탐색형 물·모래 붓기 퍼즐 - 튜브에 부어 같은 색끼리 모으기 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>붓기 놀이</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#eaf3f7; font-family:sans-serif; }
+  #stage { position:fixed; inset:0; display:flex; flex-direction:column; }
+  #board { flex:1; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:4vw;
+    padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(9vh + env(safe-area-inset-bottom)); align-content:center; }
+
+  .tube {
+    width:min(2.2cm, 15vw); height:min(9cm, 42vh); border:3px solid #b9c9d2; border-top:none;
+    border-radius:6px 6px 26px 26px; background:rgba(255,255,255,.5); cursor:pointer;
+    display:flex; flex-direction:column-reverse; overflow:hidden; padding:4px;
+    transition:transform .15s ease; box-shadow:0 3px 8px rgba(0,0,0,.08);
+  }
+  .tube.sel { transform:translateY(-3vh) scale(1.03); box-shadow:0 8px 16px rgba(0,0,0,.2); border-color:#ffb300; }
+  .tube.cheer { animation:cheer .5s ease; }
+  @keyframes cheer { 50%{ transform:translateY(-1.5vh) scale(1.05);} }
+  .seg { flex:1; border-radius:3px; margin:1.5px 0; transition:background .15s ease; }
+  .seg.empty { background:transparent; }
+  /* 물: 매끈 + 윗면 광택 */
+  .seg.water { box-shadow:inset 0 6px 8px -4px rgba(255,255,255,.7), inset 0 -4px 6px -3px rgba(0,0,0,.25); }
+  /* 모래: 알갱이 질감 */
+  .seg.sand { background-image:radial-gradient(rgba(255,255,255,.35) 12%, transparent 13%), radial-gradient(rgba(0,0,0,.18) 12%, transparent 13%);
+    background-size:8px 8px, 8px 8px; background-position:0 0, 4px 4px; box-shadow:inset 0 -3px 5px -2px rgba(0,0,0,.3); }
+
+  #home { position:fixed; top:calc(2vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:10;
+    width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite; }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
+  #mode { position:fixed; top:calc(2vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:10;
+    border:none; border-radius:50%; cursor:pointer; width:1.7cm; height:1.7cm; max-width:13vw; max-height:8vh; background:#fff; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #mode:active { transform:scale(.9); }
+
+  #bottom { position:fixed; left:50%; bottom:calc(1.6vh + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:10; display:flex; align-items:center; gap:3vw; }
+  #diff { display:flex; gap:2vw; }
+  #diff button { border:none; background:#d5e3ea; color:#3a5560; font-weight:bold; border-radius:12px; cursor:pointer;
+    width:1.2cm; height:1.2cm; max-width:9vw; max-height:5.5vh; font-size:4.6vw; box-shadow:0 2px 4px rgba(0,0,0,.12); }
+  #diff button.on { background:#7fb3c8; color:#fff; transform:scale(1.1); }
+  #new { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.4cm; height:1.4cm; max-width:11vw; max-height:6vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #new:active { transform:scale(.9); }
+</style>
+</head>
+<body>
+<div id="stage"><div id="board"></div></div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+<button id="mode" aria-label="물/모래">💧</button>
+<div id="bottom">
+  <div id="diff">
+    <button data-n="3" aria-label="난이도3">3</button>
+    <button data-n="4" aria-label="난이도4">4</button>
+    <button data-n="5" aria-label="난이도5">5</button>
+  </div>
+  <button id="new" aria-label="새 판">🔄</button>
+</div>
+
+<script src="붓기놀이.js"></script>
+</body>
+</html>
