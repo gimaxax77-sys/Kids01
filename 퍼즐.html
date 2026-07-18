@@ -1,0 +1,269 @@
+<!-- 유아 자유탐색형 조각맞추기 퍼즐 - 이미지를 격자로 잘라 드래그로 맞추기 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>조각 맞추기</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#fbf6ea; font-family:sans-serif; }
+  #stage { position:fixed; inset:0; display:flex; flex-direction:column; }
+
+  /* 상단 테마 바 */
+  #topbar {
+    display:flex; justify-content:center; align-items:center; gap:2.5vw;
+    padding:calc(1vh + env(safe-area-inset-top)) 2vw 0.6vh;
+  }
+  .theme {
+    border:none; background:#fffdf7; border-radius:16px; cursor:pointer;
+    width:1.7cm; height:1.7cm; max-width:15vw; max-height:8vh;
+    font-size:6vw; line-height:1; box-shadow:0 2px 5px rgba(0,0,0,.15);
+    display:flex; align-items:center; justify-content:center;
+  }
+  .theme.on { background:#ffe7a3; transform:scale(1.12); }
+
+  /* 중앙 보드 영역 */
+  #mid { flex:1; position:relative; }
+  #board { position:absolute; }
+  #guide { position:absolute; inset:0; background-size:contain; background-repeat:no-repeat; background-position:center; opacity:.16; }
+  .slot {
+    position:absolute; border:2px dashed #c9bd9c; border-radius:8px;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .slot.filled { border-color:transparent; }
+
+  /* 조각 공통: 퍼센트 배경으로 잘라 크기 무관하게 같은 조각 표시 */
+  .piece {
+    background-repeat:no-repeat; border-radius:8px; cursor:grab;
+    box-shadow:0 3px 6px rgba(0,0,0,.22); touch-action:none;
+  }
+  .piece.lift { position:fixed; z-index:100; cursor:grabbing; box-shadow:0 10px 16px rgba(0,0,0,.32); }
+  .piece.locked { box-shadow:none; cursor:default; width:100%; height:100%; border-radius:6px; }
+
+  /* 하단 조각 트레이 */
+  #tray {
+    display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:2.4vw;
+    padding:1.2vh 2vw calc(1.2vh + env(safe-area-inset-bottom));
+    min-height:22vh; align-content:center;
+  }
+  #tray .piece { width:min(2.4cm, 17vw); aspect-ratio:1; flex:0 0 auto; }
+
+  /* 좌상단 홈 */
+  #home {
+    position:fixed; top:calc(1.4vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:30;
+    width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw;
+    box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite;
+  }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
+
+  /* 우상단 난이도(조각 수) */
+  #diff { position:fixed; top:calc(1.4vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:30; display:flex; gap:1.6vw; }
+  #diff button {
+    border:none; background:#e6dcc4; border-radius:12px; cursor:pointer; color:#6b5b39; font-weight:bold;
+    width:1.2cm; height:1.2cm; max-width:9vw; max-height:5.5vh; font-size:4.4vw;
+    box-shadow:0 2px 4px rgba(0,0,0,.15);
+  }
+  #diff button.on { background:#cdbd97; color:#fff; transform:scale(1.1); }
+
+  #note { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#9a8c6a; font-size:4.5vw; padding:8vw; line-height:1.5; }
+
+  .slot.win { animation:glow .6s ease; }
+  @keyframes glow { 50%{ transform:scale(1.12);} }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="topbar"></div>
+  <div id="mid"><div id="board"></div></div>
+  <div id="tray"></div>
+</div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+<div id="diff"></div>
+
+<script>
+// 테마: 안전한(오픈 라이선스) 이미지는 파일 목록 고정, 히어로는 로컬 폴더에서 탐지
+const THEMES = [
+  { id:'공룡', icon:'🦕', dir:'images/공룡',   files:['trex.svg','sauropod.svg','dragon.svg'] },
+  { id:'자동차', icon:'🚗', dir:'images/자동차', files:['car.svg','taxi.svg','bus.svg','truck.svg','police.svg','pickup.svg'] },
+  { id:'사물', icon:'⚽', dir:'images/사물',   files:['apple.svg','ball.svg','balloon.svg','house.svg','gift.svg','star.svg','fish.svg','butterfly.svg'] },
+  { id:'히어로', icon:'🦸', dir:'images/히어로', files:[] }, // 로컬 탐지로 채움
+];
+let themeIdx = 0, picIdx = 0, N = 2;
+
+const mid = document.getElementById('mid');
+const board = document.getElementById('board');
+const tray = document.getElementById('tray');
+
+// 히어로 이미지 로컬 탐지(hero1..8, png/jpg) — 있는 것만 채택
+function probeHeroes() {
+  const cands = [];
+  for (let i = 1; i <= 8; i++) { cands.push('images/히어로/hero'+i+'.png'); cands.push('images/히어로/hero'+i+'.jpg'); }
+  return Promise.all(cands.map(u => new Promise(res => {
+    const im = new Image(); im.onload = () => res(u); im.onerror = () => res(null); im.src = u;
+  }))).then(a => {
+    // hero번호 중복 제거(png 우선)
+    const seen = new Set(), out = [];
+    a.filter(Boolean).forEach(u => { const key = u.replace(/\.(png|jpg)$/,''); if (!seen.has(key)) { seen.add(key); out.push(u); } });
+    return out;
+  });
+}
+
+function curImages() {
+  const t = THEMES[themeIdx];
+  return t.files.map(f => f.includes('/') ? f : t.dir + '/' + f);
+}
+
+function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
+
+// 보드 크기 계산 후 퍼즐 깔기
+function loadPuzzle() {
+  board.innerHTML = ''; tray.innerHTML = '';
+  const oldNote = mid.querySelector('#note'); if (oldNote) oldNote.remove();
+  const imgs = curImages();
+  if (!imgs.length) {
+    const n = document.createElement('div'); n.id = 'note';
+    n.textContent = THEMES[themeIdx].id + ' 이미지가 아직 없어요. images/히어로 폴더에 hero1.png 처럼 넣어주세요.';
+    mid.appendChild(n); return;
+  }
+  const src = imgs[picIdx % imgs.length];
+
+  const mw = mid.clientWidth, mh = mid.clientHeight;
+  if (!mw || !mh) { requestAnimationFrame(loadPuzzle); return; }
+  const B = Math.min(mw * 0.92, mh * 0.92);
+  const tile = B / N;
+  board.style.width = board.style.height = B + 'px';
+  board.style.left = (mw - B) / 2 + 'px';
+  board.style.top  = (mh - B) / 2 + 'px';
+
+  // 안내용 흐린 전체 그림
+  const guide = document.createElement('div'); guide.id = 'guide';
+  guide.style.backgroundImage = `url("${src}")`;
+  board.appendChild(guide);
+
+  // 슬롯 + 조각 생성
+  const cells = [];
+  for (let r = 0; r < N; r++) for (let c = 0; c < N; c++) {
+    const idx = r * N + c;
+    const slot = document.createElement('div');
+    slot.className = 'slot'; slot.dataset.idx = idx;
+    slot.style.left = c*tile+'px'; slot.style.top = r*tile+'px';
+    slot.style.width = slot.style.height = tile+'px';
+    board.appendChild(slot);
+    cells.push({ idx, r, c });
+  }
+
+  // 조각을 트레이에 섞어서
+  shuffle(cells).forEach(cell => {
+    const p = document.createElement('div');
+    p.className = 'piece'; p.dataset.idx = cell.idx;
+    p.style.backgroundImage = `url("${src}")`;
+    p.style.backgroundSize = (N*100) + '% ' + (N*100) + '%';
+    // 퍼센트 위치: N>1일 때 c/(N-1), r/(N-1)
+    const px = N>1 ? (cell.c/(N-1))*100 : 0;
+    const py = N>1 ? (cell.r/(N-1))*100 : 0;
+    p.style.backgroundPosition = px + '% ' + py + '%';
+    attachDrag(p, tile);
+    tray.appendChild(p);
+  });
+}
+
+let dragging = null;
+function attachDrag(p, tile) {
+  let offX = 0, offY = 0;
+  p.addEventListener('pointerdown', (e) => {
+    if (p.classList.contains('locked')) return;
+    dragging = p; audio();
+    const r = p.getBoundingClientRect();
+    // 트레이 크기 그대로 들어올림
+    p.style.width = r.width + 'px'; p.style.height = r.height + 'px';
+    p.classList.add('lift');
+    offX = e.clientX - r.left; offY = e.clientY - r.top;
+    p.style.left = r.left + 'px'; p.style.top = r.top + 'px';
+    p.setPointerCapture(e.pointerId);
+  });
+  p.addEventListener('pointermove', (e) => {
+    if (dragging !== p) return;
+    p.style.left = (e.clientX - offX) + 'px';
+    p.style.top  = (e.clientY - offY) + 'px';
+  });
+  p.addEventListener('pointerup', (e) => {
+    if (dragging !== p) return;
+    dragging = null;
+    const slot = [...board.querySelectorAll('.slot')].find(s => {
+      const r = s.getBoundingClientRect();
+      return e.clientX>=r.left && e.clientX<=r.right && e.clientY>=r.top && e.clientY<=r.bottom;
+    });
+    if (slot && slot.dataset.idx === p.dataset.idx && !slot.classList.contains('filled')) {
+      // 정답: 슬롯에 딱 맞춰 고정
+      p.classList.remove('lift'); p.classList.add('locked');
+      p.style.left = p.style.top = ''; p.style.width = p.style.height = '';
+      slot.classList.add('filled'); slot.appendChild(p);
+      slot.classList.remove('win'); void slot.offsetWidth; slot.classList.add('win');
+      happy();
+      if (board.querySelectorAll('.slot.filled').length === N*N) win();
+    } else {
+      // 오답: 트레이로 돌려보냄(벌 없음)
+      p.classList.remove('lift');
+      p.style.left = p.style.top = ''; p.style.width = p.style.height = '';
+      tray.appendChild(p);
+      blip();
+    }
+  });
+}
+
+// 완성: 축하 후 다음 그림
+function win() {
+  const g = document.getElementById('guide'); if (g) g.style.opacity = 0;
+  const slots = [...board.querySelectorAll('.slot')];
+  slots.forEach((s,i) => setTimeout(() => { s.classList.remove('win'); void s.offsetWidth; s.classList.add('win'); }, i*70));
+  chord();
+  setTimeout(() => { picIdx++; loadPuzzle(); }, 1500);
+}
+
+// 상단 테마 버튼
+const topbar = document.getElementById('topbar');
+THEMES.forEach((t, i) => {
+  const b = document.createElement('button');
+  b.className = 'theme' + (i===themeIdx?' on':''); b.textContent = t.icon; b.title = t.id;
+  b.addEventListener('click', () => {
+    themeIdx = i; picIdx = 0;
+    document.querySelectorAll('.theme').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    loadPuzzle(); ping();
+  });
+  topbar.appendChild(b);
+});
+
+// 난이도(조각 수) 버튼
+const diff = document.getElementById('diff');
+[2,3,4].forEach(n => {
+  const b = document.createElement('button');
+  b.textContent = (n*n); b.className = (n===N?'on':''); // 4/9/16 조각
+  b.addEventListener('click', () => {
+    N = n; // 조각 수만 바꾸고 현재 그림 유지
+    document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on')); b.classList.add('on');
+    loadPuzzle(); ping();
+  });
+  diff.appendChild(b);
+});
+
+window.addEventListener('resize', () => loadPuzzle());
+
+// --- 소리 ---
+let ac;
+function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
+function beep(f,d,type='sine',v=0.12){ const a=audio(),o=a.createOscillator(),g=a.createGain(); o.type=type;o.frequency.value=f;g.gain.value=0.001;o.connect(g).connect(a.destination);o.start(); g.gain.linearRampToValueAtTime(v,a.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d); o.stop(a.currentTime+d+0.02); }
+function happy(){ beep(523,0.15); setTimeout(()=>beep(784,0.2),80); }
+function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.35,'triangle'),i*110)); }
+function blip(){ beep(196,0.16,'sine',0.08); }
+function ping(){ beep(600,0.13,'triangle'); }
+
+// 시작: 히어로 탐지 후 로드
+probeHeroes().then(list => { THEMES[3].files = list; loadPuzzle(); });
+window.addEventListener('load', loadPuzzle);
+</script>
+</body>
+</html>
