@@ -37,7 +37,7 @@ window.CONTENT_PACKS.pictures.push(
     {tag:'ellipse', fillable:false, fill:'#ffffff', attrs:{cx:222,cy:112,rx:9,ry:5,opacity:0.3}}
   ]},
   {id:'stego', name:'스테고사우루스', emoji:'🦕', ageMin:6, ageMax:99, shapes:[
-    {tag:'path', fillable:true, color:'#8d6e63', attrs:{d:'M20,184 Q48,170 82,172 Q108,108 165,106 Q222,110 248,150 Q258,158 248,170 L243,186 Q233,190 223,178 Q168,194 108,190 Q68,200 28,199 Q12,194 20,184 Z'}},
+    {tag:'path', fillable:true, color:'#8d6e63', attrs:{d:'M20,180 Q45,150 78,148 Q110,108 165,106 Q222,110 248,150 Q258,158 248,170 L243,186 Q233,190 223,178 Q168,194 108,190 Q68,200 28,199 Q12,194 20,180 Z'}},
     {tag:'ellipse', fillable:false, fill:'#bcaaa4', attrs:{cx:130,cy:150,rx:35,ry:14,opacity:0.6}},
     {tag:'path', fillable:true, color:'#5d4037', attrs:{d:'M118,205 Q112,225 108,240 Q106,250 118,250 Q128,250 128,240 Q130,222 132,206 Z'}},
     {tag:'path', fillable:true, color:'#5d4037', attrs:{d:'M168,203 Q163,225 160,240 Q159,250 171,250 Q181,250 180,240 Q181,222 182,204 Z'}},
