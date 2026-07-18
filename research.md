@@ -146,6 +146,45 @@ Drawing for Kids(Bimi Boo, 2~5, 광고없음) / Todli(2~5, 오프라인 단계�
 ### 반성 메모
 - 직전 턴에서 결정 질문을 산문으로 물어 소통 규칙 5번(선택박스) 위반 → 이후 결정 지점은 반드시 AskUserQuestion 사용.
 
+---
+
+## [2026-07-18] "sort 게임" 조사 — 교육용 분류 놀이 + 캐주얼 소트 퍼즐
+
+### 요청
+sort 게임 정보 조사·브리핑. (Gim 선택: 둘 다 = 유아 교육용 분류 + Ball/Water Sort 퍼즐.)
+
+### 진행 과정
+웹 검색 3건 — 유아 분류 앱 / 볼·워터 소트 퍼즐 메커니즘·시장 / 유아 분류 학습 효과·발달단계.
+
+### 핵심 결론
+같은 "분류"라도 목적 반대. 교육용=배우게, 소트퍼즐=빠져들게. 우리 앱엔 교육용 뼈대 + 퍼즐 손맛 결합이 정답.
+
+### 갈래 1. 유아 분류 놀이(교육용)
+- 대표 앱 — TinyHands Sorting(2세+, 모양·색·계절·탈것), Sort & Learn for Kids(드래그 분류), Baby Games: Shapes and Colors(Bimi Boo, 광고없음 30게임), Shapes & Colors(Dubby Dino, 공룡테마).
+- 학습 효과 — 분류는 기억·주의·추론·어휘 등 거의 모든 사고와 연결(미시간대). 인지적 유연성(규칙 바꿔 분류)이 훗날 수학·읽기 성취 예측.
+- 발달 단계 — 12~18개월: 똑같은 것 매칭 / 24~30개월: 한 기준(색 or 모양) / 36~48개월: 여러 기준(기능·범주).
+
+### 갈래 2. 볼/워터 소트 퍼즐(캐주얼)
+- 메커니즘 — 튜브 탭해 같은 색 공·액체 모으기. 핵심 재미=튜브 용량·이동 제약.
+- 설계 — 직관적 탭, 부드러운 애니, 선명한 색, 절차적 생성 무한레벨, AI 난이도 조절, 언어 불필요.
+- 시장 — sort&screw 카테고리 IAP 2024→2025 2배. 하이브리드캐주얼 퍼즐 2025 Q1 $87M(+67%). 첫해 다운 5천만~1억, D1 리텐션 40~50%.
+- 인기 공식 — 5초 규칙 + 짧은 성취(도파민).
+
+### 시사점 (우리 자유탐색형 1~8세)
+1. 뼈대는 교육용 분류(색·모양·크기), 실패·정답판정 없음.
+2. 연령 슬라이더 필수 — 어린이=매칭부터, 큰아이=여러 기준. (위 발달 단계표 기준)
+3. 소트퍼즐 손맛 차용 — 올바른 통에 넣을 때 흡입 애니+만족음, 틀려도 벌 없이 튕김.
+4. 언어 0 — 두 장르 공통 강점, 우리 원칙과 일치.
+5. 범위 밖(나중) — 레벨·별점·시간제한·절차적 생성은 오락 요소, "도전 모드"로 분리 시 검토.
+
+### 출처
+- https://apps.apple.com/us/app/tinyhands-sorting-1-teach/id599965478
+- https://play.google.com/store/apps/details?id=com.strealtech.sortandlearnforkids
+- https://monkibox.com/blogs/community/toddler-categorizing-sorting
+- https://www.canr.msu.edu/news/sorting-and-classifying-with-infants-and-toddlers
+- https://www.capermint.com/blog/water-sort-puzzle-bottle-game/
+- https://naavik.co/digest/why-peak-games-investors-backed-grand-games/
+
 ### 출처
 - https://www.commonsensemedia.org/app-reviews/pok-pok-playroom
 - https://www.macstories.net/reviews/pok-pok-playroom-a-delightful-digital-toybox-for-kids/
