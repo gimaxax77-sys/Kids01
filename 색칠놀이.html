@@ -39,12 +39,14 @@
 
   #note { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9a8c6a; font-size:4.5vw; text-align:center; padding:8vw; }
 
-  /* 그림 고르기 오버레이 */
-  #gallery { position:fixed; inset:0; z-index:100; background:rgba(30,24,14,.55); display:none; }
-  #gallery.open { display:block; }
-  #gallery .gclose { position:absolute; top:calc(2vh + env(safe-area-inset-top)); right:4vw; width:11vw; height:11vw; max-width:52px; max-height:52px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:6vw; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.25); }
-  #gallery .ggrid { position:absolute; inset:0; padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(4vh + env(safe-area-inset-bottom)); overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(24vw,1fr)); gap:3vw; align-content:start; }
-  #gallery .thumb { background:#fff; border-radius:14px; aspect-ratio:1; box-shadow:0 2px 6px rgba(0,0,0,.2); cursor:pointer; overflow:hidden; }
+  /* 그림 고르기 오버레이 (헤더 + 스크롤 그리드, 겹침 없음) */
+  #gallery { position:fixed; inset:0; z-index:100; background:rgba(30,24,14,.6); display:none; flex-direction:column; }
+  #gallery.open { display:flex; }
+  #gallery .ghead { flex:0 0 auto; display:flex; justify-content:flex-end; padding:calc(1.5vh + env(safe-area-inset-top)) 4vw 1vh; }
+  #gallery .gclose { width:12vw; height:12vw; max-width:54px; max-height:54px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:6vw; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  #gallery .gclose:active { transform:scale(.9); }
+  #gallery .ggrid { flex:1; overflow-y:auto; padding:0 4vw calc(4vh + env(safe-area-inset-bottom)); display:grid; grid-template-columns:repeat(auto-fill, minmax(24vw,1fr)); gap:3vw; align-content:start; }
+  #gallery .thumb { aspect-ratio:1; background:#fff; border-radius:14px; box-shadow:0 2px 6px rgba(0,0,0,.2); cursor:pointer; overflow:hidden; }
   #gallery .thumb svg { width:100%; height:100%; }
   #gallery .thumb:active { transform:scale(.94); }
 </style>
@@ -64,7 +66,7 @@
   <div id="palette"></div>
 </div>
 <!-- 그림 고르기(썸네일) -->
-<div id="gallery"><div class="gclose">✕</div><div class="ggrid"></div></div>
+<div id="gallery"><div class="ghead"><div class="gclose">✕</div></div><div class="ggrid"></div></div>
 
 <script>
 // 메인 앱과 동일한 SVG 빌더 (색칠공부/조각맞추기 팩 공용). 팩보다 먼저 정의(팩이 sunRays 사용)
@@ -139,7 +141,7 @@ document.getElementById('reset').addEventListener('click', ()=>{ loadPic(); ping
 // 그림 고르기(썸네일) — 색칠은 색 입힌 미리보기
 const gallery = document.getElementById('gallery');
 gallery.querySelector('.gclose').addEventListener('click', ()=> gallery.classList.remove('open'));
-gallery.addEventListener('click', (e)=>{ if(e.target===gallery) gallery.classList.remove('open'); });
+gallery.addEventListener('click', (e)=>{ if(e.target===gallery || e.target.classList.contains('ggrid') || e.target.classList.contains('ghead')) gallery.classList.remove('open'); });
 document.getElementById('gallery-btn').addEventListener('click', ()=>{
   const pics = byTheme[THEMES[themeIdx].id]; const grid = gallery.querySelector('.ggrid'); grid.innerHTML = '';
   pics.forEach((p,i)=>{
