@@ -22,11 +22,11 @@ vm.createContext(sandbox);
   vm.runInContext(fs.readFileSync(path.join(ROOT,f),'utf8'), sandbox, {filename:f});
 });
 
+// 캐릭터(마블 등)는 저작권상 배포 제외 — 사용자가 퍼즐에서 직접 사진을 골라 사용. 여기선 생성 안 함.
 const MAP = {
   trex:'공룡', triceratops:'공룡', stego:'공룡', brachio:'공룡', ptero:'공룡',
   car:'자동차',
   apple:'사물', house:'사물', fish:'사물', butterfly:'사물', sun:'사물', ball:'사물', umbrella:'사물', robot:'사물', plane:'사물', rocket:'사물',
-  ironman:'히어로', spiderman:'히어로', 'cap-america':'히어로', hulk:'히어로', thor:'히어로', blackpanther:'히어로',
 };
 let n=0;
 sandbox.window.CONTENT_PACKS.pictures.forEach(p=>{

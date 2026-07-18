@@ -69,7 +69,14 @@
   }
   #diff button.on { background:#cdbd97; color:#fff; transform:scale(1.1); }
 
-  #note { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; text-align:center; color:#9a8c6a; font-size:4.5vw; padding:8vw; line-height:1.5; }
+  #note { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; color:#9a8c6a; font-size:4.5vw; padding:8vw; line-height:1.5; }
+  #pickbig { border:none; background:#ffd54f; color:#5b4a1a; font-weight:bold; font-size:5.5vw; padding:3.5vw 7vw; border-radius:18px; cursor:pointer; box-shadow:0 4px 10px rgba(0,0,0,.2); }
+  #pickbig:active { transform:scale(.95); }
+
+  /* 캐릭터 사진 추가/비우기 */
+  #charctl { position:fixed; left:calc(3vw + env(safe-area-inset-left)); bottom:calc(1.6vh + env(safe-area-inset-bottom)); z-index:30; gap:2vw; }
+  #charctl button { border:none; border-radius:50%; cursor:pointer; width:1.5cm; height:1.5cm; max-width:11vw; max-height:6.5vh; font-size:5vw; background:#fff; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #charctl button:active { transform:scale(.9); }
 
   .slot.win { animation:glow .6s ease; }
   @keyframes glow { 50%{ transform:scale(1.12);} }
@@ -83,17 +90,24 @@
 </div>
 <a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
 <div id="diff"></div>
+<!-- 캐릭터: 아무 이름·아무 확장자 이미지나 선택 -->
+<input id="filepick" type="file" multiple hidden>
+<div id="charctl" style="display:none">
+  <button id="charadd" aria-label="사진 추가">＋</button>
+  <button id="charclear" aria-label="사진 비우기">🗑</button>
+</div>
 
 <!-- 이미지 목록은 images/ 폴더에서 자동 생성됨(직접 수정 금지). 히어로는 저작권상 제외 -->
 <script src="packs/puzzle-manifest.js"></script>
 <script>
-// 테마: 공룡/자동차/사물은 매니페스트에서, 히어로는 로컬 폴더에서 탐지
+// 테마: 공룡/자동차/사물은 매니페스트에서. 캐릭터는 사용자가 직접 고른 이미지(브라우저에만 저장, 개인용)
 const M = window.PUZZLE_IMAGES || {};
+const CHAR = 3; // 캐릭터 테마 인덱스
 const THEMES = [
   { id:'공룡', icon:'🦕', files: M['공룡'] || [] },
   { id:'자동차', icon:'🚗', files: M['자동차'] || [] },
   { id:'사물', icon:'⚽', files: M['사물'] || [] },
-  { id:'히어로', icon:'🦸', files: [] }, // 로컬 탐지로 채움
+  { id:'캐릭터', icon:'🦸', files: [] }, // 아래에서 저장분 채움
 ];
 let themeIdx = 0, picIdx = 0, N = 2;
 
@@ -101,20 +115,32 @@ const mid = document.getElementById('mid');
 const board = document.getElementById('board');
 const tray = document.getElementById('tray');
 
-// 히어로 이미지 로컬 탐지(hero1..8, png/jpg) — 있는 것만 채택
-function probeHeroes() {
-  // Gim이 직접 그린 히어로 SVG(로컬 전용) + 사용자가 넣은 hero1~8.png/jpg
-  const cands = ['pack-ironman','pack-spiderman','pack-cap-america','pack-hulk','pack-thor','pack-blackpanther']
-    .map(n => 'images/히어로/' + n + '.svg');
-  for (let i = 1; i <= 8; i++) { cands.push('images/히어로/hero'+i+'.png'); cands.push('images/히어로/hero'+i+'.jpg'); }
-  return Promise.all(cands.map(u => new Promise(res => {
-    const im = new Image(); im.onload = () => res(u); im.onerror = () => res(null); im.src = u;
-  }))).then(a => {
-    const seen = new Set(), out = [];
-    a.filter(Boolean).forEach(u => { const key = u.replace(/\.[a-z]+$/i,''); if (!seen.has(key)) { seen.add(key); out.push(u); } });
-    return out;
+// 캐릭터 이미지: 브라우저(localStorage)에만 저장 — 업로드·배포 없음
+function loadChars(){ try { return JSON.parse(localStorage.getItem('charImages') || '[]'); } catch(e) { return []; } }
+function saveChars(a){ try { localStorage.setItem('charImages', JSON.stringify(a)); } catch(e) { /* 용량초과 등: 이번 세션에선 유지 */ } }
+THEMES[CHAR].files = loadChars();
+
+// 아무 이름·아무 확장자 이미지나 골라 추가(이미지로 열리는 것만 채택)
+function addFiles(fileList){
+  const files = [...fileList]; if(!files.length) return;
+  let pending = files.length; const added = [];
+  const done = () => { if(--pending === 0) finish(); };
+  files.forEach(f => {
+    const rd = new FileReader();
+    rd.onload = () => { const im = new Image(); im.onload = () => { added.push(rd.result); done(); }; im.onerror = done; im.src = rd.result; };
+    rd.onerror = done;
+    rd.readAsDataURL(f);
   });
+  function finish(){
+    if(!added.length) return;
+    THEMES[CHAR].files = THEMES[CHAR].files.concat(added);
+    saveChars(THEMES[CHAR].files);
+    picIdx = 0;
+    if(themeIdx === CHAR) loadPuzzle();
+    ping();
+  }
 }
+function clearChars(){ THEMES[CHAR].files = []; saveChars([]); picIdx = 0; if(themeIdx === CHAR) loadPuzzle(); }
 
 function curImages() { return THEMES[themeIdx].files; }
 
@@ -124,10 +150,18 @@ function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.rand
 function loadPuzzle() {
   board.innerHTML = ''; tray.innerHTML = '';
   const oldNote = mid.querySelector('#note'); if (oldNote) oldNote.remove();
+  updateCharCtl();
   const imgs = curImages();
   if (!imgs.length) {
     const n = document.createElement('div'); n.id = 'note';
-    n.textContent = THEMES[themeIdx].id + ' 이미지가 아직 없어요. images/히어로 폴더에 hero1.png 처럼 넣어주세요.';
+    if (themeIdx === CHAR) {
+      n.innerHTML = '<div style="margin-bottom:4vw">내 사진으로 퍼즐 만들기</div>';
+      const btn = document.createElement('button'); btn.id = 'pickbig'; btn.textContent = '🖼️ 사진 고르기';
+      btn.onclick = () => filepick.click();
+      n.appendChild(btn);
+    } else {
+      n.textContent = THEMES[themeIdx].id + ' 이미지가 아직 없어요.';
+    }
     mid.appendChild(n); return;
   }
   const src = imgs[picIdx % imgs.length];
@@ -262,8 +296,18 @@ function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.35,'
 function blip(){ beep(196,0.16,'sine',0.08); }
 function ping(){ beep(600,0.13,'triangle'); }
 
-// 시작: 히어로 탐지 후 로드
-probeHeroes().then(list => { THEMES[3].files = list; loadPuzzle(); });
+// 캐릭터 테마용 컨트롤(사진 추가/비우기) — 캐릭터 테마일 때만 표시
+const filepick = document.getElementById('filepick');
+filepick.addEventListener('change', (e) => { addFiles(e.target.files); filepick.value = ''; });
+document.getElementById('charadd').addEventListener('click', () => filepick.click());
+document.getElementById('charclear').addEventListener('click', clearChars);
+function updateCharCtl(){
+  const show = (themeIdx === CHAR) && THEMES[CHAR].files.length > 0;
+  document.getElementById('charctl').style.display = show ? 'flex' : 'none';
+}
+
+// 시작
+loadPuzzle();
 window.addEventListener('load', loadPuzzle);
 </script>
 </body>
