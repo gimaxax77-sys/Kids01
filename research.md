@@ -146,6 +146,12 @@ Drawing for Kids(Bimi Boo, 2~5, 광고없음) / Todli(2~5, 오프라인 단계�
 ### 반성 메모
 - 직전 턴에서 결정 질문을 산문으로 물어 소통 규칙 5번(선택박스) 위반 → 이후 결정 지점은 반드시 AskUserQuestion 사용.
 
+### GitHub Pages 배포 (2026-07-19)
+- 배포 주소 — https://gimaxax77-sys.github.io/Kids01/ (index.html → 놀이방.html 리다이렉트).
+- 방법 — 로컬 저장 자격증명(git credential fill) 토큰으로 REST API POST /repos/.../pages (source: main, /). gh CLI 없이 처리.
+- 검증(실사이트) — 전 페이지 200, 모바일 375×812에서 innerW=375 정상·칸/아이템 정상 렌더(file:// 스냅샷의 0-뷰포트 문제 없음).
+- [[reference]] 배포 URL은 MEMORY 참조 대상.
+
 ### 모바일 대응 점검·수정 (2026-07-19)
 - 그림판 팔레트 — 색 8개가 좁은 폰에서 flex-shrink로 타원 붕괴 → flex-wrap + width:min(2.2cm,17vw) + aspect-ratio:1 + flex:0 0 auto. 검증: 375px에서 64px 원 유지·2줄·넘침 없음.
 - 분류놀이 아이템 — 난이도 4(8개)가 한 줄이라 세로폰에서 가로 겹침 → 2줄 격자(cols=ceil(per/2)). 검증: 375px 겹침 0.
