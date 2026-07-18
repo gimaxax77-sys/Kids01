@@ -1,8 +1,11 @@
 # 이미지 출처
 
-## 공룡 · 자동차 · 사물
-[OpenMoji](https://openmoji.org) — 오픈소스 이모지 라이브러리.
-라이선스: **CC BY-SA 4.0**. 출처 표시와 동일조건 변경허락 조건으로 자유 사용·배포 가능.
+## 공룡 · 자동차 · 사물 (퍼즐)
+[Twemoji](https://github.com/twitter/twemoji) — Twitter/X 오픈소스 이모지.
+라이선스: 그래픽 **CC-BY 4.0**. 출처 표시 조건으로 자유 사용·배포 가능.
+
+## 색칠 선그림 (color-pages)
+[OpenMoji](https://openmoji.org) black(아웃라인) 세트. 라이선스: **CC BY-SA 4.0**.
 
 ## 캐릭터 테마
 저작권 있는 캐릭터 이미지는 공개 배포할 수 없으므로 저장소에 포함하지 않습니다.
