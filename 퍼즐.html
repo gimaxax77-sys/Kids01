@@ -10,11 +10,12 @@
   html, body { height:100%; overflow:hidden; touch-action:none; background:#fbf6ea; font-family:sans-serif; }
   #stage { position:fixed; inset:0; display:flex; flex-direction:column; }
 
-  /* 상단 테마 바 */
+  /* 상단 바: 홈 + 테마 + 난이도를 한 줄에, 좁으면 자동 줄바꿈 */
   #topbar {
-    display:flex; justify-content:center; align-items:center; gap:2.5vw;
+    display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:2.2vw;
     padding:calc(1vh + env(safe-area-inset-top)) 2vw 0.6vh;
   }
+  #themes { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:2.2vw; }
   .theme {
     border:none; background:#fffdf7; border-radius:16px; cursor:pointer;
     width:1.7cm; height:1.7cm; max-width:15vw; max-height:8vh;
@@ -49,10 +50,9 @@
   }
   #tray .piece { width:min(2.4cm, 17vw); aspect-ratio:1; flex:0 0 auto; }
 
-  /* 좌상단 홈 */
+  /* 홈 (상단 바 안) */
   #home {
-    position:fixed; top:calc(1.4vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:30;
-    width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh;
+    width:1.5cm; height:1.5cm; max-width:12vw; max-height:8vh; flex:0 0 auto;
     display:flex; align-items:center; justify-content:center;
     border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw;
     box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite;
@@ -60,8 +60,8 @@
   #home:active { transform:scale(.9); }
   @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
 
-  /* 우상단 난이도(조각 수) */
-  #diff { position:fixed; top:calc(1.4vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:30; display:flex; gap:1.6vw; }
+  /* 난이도(조각 수, 상단 바 안) */
+  #diff { display:flex; gap:1.6vw; }
   #diff button {
     border:none; background:#e6dcc4; border-radius:12px; cursor:pointer; color:#6b5b39; font-weight:bold;
     width:1.2cm; height:1.2cm; max-width:9vw; max-height:5.5vh; font-size:4.4vw;
@@ -84,12 +84,14 @@
 </head>
 <body>
 <div id="stage">
-  <div id="topbar"></div>
+  <div id="topbar">
+    <a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+    <div id="themes"></div>
+    <div id="diff"></div>
+  </div>
   <div id="mid"><div id="board"></div></div>
   <div id="tray"></div>
 </div>
-<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
-<div id="diff"></div>
 <!-- 캐릭터: 아무 이름·아무 확장자 이미지나 선택 -->
 <input id="filepick" type="file" multiple hidden>
 <div id="charctl" style="display:none">
@@ -260,7 +262,7 @@ function win() {
 }
 
 // 상단 테마 버튼
-const topbar = document.getElementById('topbar');
+const topbar = document.getElementById('themes');
 THEMES.forEach((t, i) => {
   const b = document.createElement('button');
   b.className = 'theme' + (i===themeIdx?' on':''); b.textContent = t.icon; b.title = t.id;
