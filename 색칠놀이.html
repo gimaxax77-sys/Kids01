@@ -1,4 +1,4 @@
-<!-- 유아 자유탐색형 색칠놀이 - 선그림을 캔버스에 그리고 탭한 칸을 채우기(flood-fill) -->
+<!-- 유아 자유탐색형 색칠놀이 - 선그림 아래를 문질러 칠하기(선은 항상 위에 유지) -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -17,7 +17,9 @@
 
   #mid { flex:1; position:relative; }
   #artwrap { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-  #art { background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.1); touch-action:none; cursor:pointer; }
+  .artbox { position:relative; background:#fff; border-radius:12px; box-shadow:0 2px 10px rgba(0,0,0,.1); overflow:hidden; }
+  #paint { display:block; touch-action:none; cursor:pointer; }
+  #lines { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
 
   #palette { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:2.4vw; padding:1.2vh 2vw calc(1.2vh + env(safe-area-inset-bottom)); background:#efe9dc; }
   .swatch { flex:0 0 auto; width:min(1.9cm, 14vw); aspect-ratio:1; border-radius:50%; border:2px solid rgba(0,0,0,.12); cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,.18); transition:transform .12s ease; }
@@ -53,7 +55,7 @@
       <button id="next" aria-label="새 그림">🔄</button>
     </div>
   </div>
-  <div id="mid"><div id="artwrap"><canvas id="art"></canvas></div></div>
+  <div id="mid"><div id="artwrap"><div class="artbox"><canvas id="paint"></canvas><img id="lines" alt=""></div></div></div>
   <div id="palette"></div>
 </div>
 <div id="gallery"><div class="ghead"><div class="gclose">✕</div></div><div class="ggrid"></div></div>
@@ -69,79 +71,51 @@ const THEMES = [
 ];
 const COLORS = ['#e23b3b','#ef7d1a','#f5c518','#3fae54','#4aa3df','#3b7de2','#9b4fd0','#ec5a92','#8d6e63','#333333','#ffffff'];
 let current = COLORS[0], themeIdx = 0, picIdx = 0;
-const RES = 540; // 캔버스 내부 해상도
+const RES = 560;
 
-const canvas = document.getElementById('art');
-const ctx = canvas.getContext('2d', { willReadFrequently:true });
-canvas.width = canvas.height = RES;
+const box = document.querySelector('.artbox');
+const paint = document.getElementById('paint');
+const lines = document.getElementById('lines');
+const pctx = paint.getContext('2d');
+paint.width = paint.height = RES;
 
-function fitCanvas(){
+function fitBox(){
   const mid = document.getElementById('mid');
   const s = Math.min(mid.clientWidth, mid.clientHeight) * 0.95;
-  canvas.style.width = canvas.style.height = s + 'px';
+  box.style.width = box.style.height = s + 'px';
+  paint.style.width = paint.style.height = s + 'px';
 }
 
-// 현재 선그림 로드 → 흰 배경 + 선 그리기
-// SVG에 width/height가 없으면 캔버스 렌더가 0이 되므로 크기를 주입해 blob으로 로드(캔버스 오염도 회피)
-let curImg = null;
+function clearPaint(){ pctx.fillStyle = '#ffffff'; pctx.fillRect(0,0,RES,RES); }
+
+// 선그림 로드: width/height 주입해 blob으로(위 레이어 img)
 async function loadPage(){
   const files = THEMES[themeIdx].files;
-  fitCanvas();
-  if(!files.length){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,RES,RES); curImg=null; return; }
+  fitBox(); clearPaint();
+  if(!files.length){ lines.removeAttribute('src'); return; }
   const src = files[picIdx % files.length];
   try {
     let txt = await (await fetch(src)).text();
     if(!/<svg[^>]*\swidth=/.test(txt)) txt = txt.replace('<svg', '<svg width="'+RES+'" height="'+RES+'"');
-    const url = URL.createObjectURL(new Blob([txt], {type:'image/svg+xml'}));
-    const img = new Image();
-    img.onload = () => { curImg = img; drawOutline(); URL.revokeObjectURL(url); };
-    img.src = url;
-  } catch(e){ ctx.fillStyle='#fff'; ctx.fillRect(0,0,RES,RES); }
-}
-function drawOutline(){
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0,0,RES,RES);
-  if(curImg){ const pad = RES*0.06; ctx.drawImage(curImg, pad, pad, RES-pad*2, RES-pad*2); }
+    lines.src = URL.createObjectURL(new Blob([txt], {type:'image/svg+xml'}));
+  } catch(e) {}
 }
 
-// --- 부어서 칠하기(flood-fill) ---
-function hexToRGB(h){ return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
-function floodFill(sx, sy, fill){
-  const img = ctx.getImageData(0,0,RES,RES);
-  const d = img.data;
-  const idx = (x,y)=>(y*RES+x)*4;
-  const si = idx(sx,sy);
-  const sr=d[si], sg=d[si+1], sb=d[si+2];
-  // 선(어두운 픽셀)은 칠하지 않음
-  if(sr+sg+sb < 260) return false;
-  const [fr,fg,fb] = fill;
-  if(Math.abs(sr-fr)+Math.abs(sg-fg)+Math.abs(sb-fb) < 8) return false; // 이미 같은 색
-  const tol = 70, darkLimit = 300; // 경계=어두운 픽셀
-  const match = (i)=>{
-    if(d[i]+d[i+1]+d[i+2] < darkLimit) return false; // 선이면 멈춤
-    return Math.abs(d[i]-sr)+Math.abs(d[i+1]-sg)+Math.abs(d[i+2]-sb) < tol;
-  };
-  const stack=[sx,sy];
-  while(stack.length){
-    const y=stack.pop(), x=stack.pop();
-    let xL=x; while(xL>=0 && match(idx(xL,y))) xL--; xL++;
-    let xR=x; while(xR<RES && match(idx(xR,y))) xR++; xR--;
-    for(let xi=xL; xi<=xR; xi++){
-      const i=idx(xi,y); d[i]=fr; d[i+1]=fg; d[i+2]=fb; d[i+3]=255;
-      if(y>0 && match(idx(xi,y-1))) stack.push(xi,y-1);
-      if(y<RES-1 && match(idx(xi,y+1))) stack.push(xi,y+1);
-    }
-  }
-  ctx.putImageData(img,0,0);
-  return true;
+// --- 문질러 칠하기 ---
+let drawing = false, last = null;
+function toXY(e){ const r = paint.getBoundingClientRect(); return { x:(e.clientX-r.left)/r.width*RES, y:(e.clientY-r.top)/r.height*RES }; }
+function dab(p){
+  pctx.strokeStyle = pctx.fillStyle = current;
+  pctx.lineCap = 'round'; pctx.lineJoin = 'round'; pctx.lineWidth = RES*0.11;
+  if(last){ pctx.beginPath(); pctx.moveTo(last.x,last.y); pctx.lineTo(p.x,p.y); pctx.stroke(); }
+  pctx.beginPath(); pctx.arc(p.x,p.y,RES*0.055,0,7); pctx.fill();
+  last = p;
 }
-canvas.addEventListener('pointerdown', (e)=>{
-  const r = canvas.getBoundingClientRect();
-  const x = Math.floor((e.clientX-r.left)/r.width*RES);
-  const y = Math.floor((e.clientY-r.top)/r.height*RES);
-  if(x<0||y<0||x>=RES||y>=RES) return;
-  audio();
-  if(floodFill(x,y, hexToRGB(current))) fillSound();
-});
+paint.addEventListener('pointerdown', (e)=>{ drawing=true; last=null; audio(); dab(toXY(e)); fillSound(); paint.setPointerCapture(e.pointerId); });
+paint.addEventListener('pointermove', (e)=>{ if(drawing) dab(toXY(e)); });
+function endDraw(){ drawing=false; last=null; }
+paint.addEventListener('pointerup', endDraw);
+paint.addEventListener('pointercancel', endDraw);
 
 // 상단 테마 버튼
 const topbar = document.getElementById('themes');
@@ -160,7 +134,7 @@ COLORS.forEach((c,i)=>{
 });
 
 document.getElementById('next').addEventListener('click', ()=>{ const f=THEMES[themeIdx].files; if(f.length){ picIdx=(picIdx+1)%f.length; loadPage(); ping(); } });
-document.getElementById('reset').addEventListener('click', ()=>{ drawOutline(); ping(); });
+document.getElementById('reset').addEventListener('click', ()=>{ clearPaint(); ping(); });
 
 // 그림 고르기(썸네일)
 const gallery = document.getElementById('gallery');
@@ -172,13 +146,13 @@ document.getElementById('gallery-btn').addEventListener('click', ()=>{
   gallery.classList.add('open'); ping();
 });
 
-window.addEventListener('resize', ()=>{ fitCanvas(); });
+window.addEventListener('resize', fitBox);
 
 // --- 소리 ---
 let ac;
 function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
-function beep(f,d,type='sine',v=0.1){ const a=audio(),o=a.createOscillator(),g=a.createGain(); o.type=type;o.frequency.value=f;g.gain.value=0.001;o.connect(g).connect(a.destination);o.start(); g.gain.linearRampToValueAtTime(v,a.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d); o.stop(a.currentTime+d+0.02); }
-function fillSound(){ beep(430,0.14,'sine',0.09); }
+function beep(f,d,type='sine',v=0.08){ const a=audio(),o=a.createOscillator(),g=a.createGain(); o.type=type;o.frequency.value=f;g.gain.value=0.001;o.connect(g).connect(a.destination);o.start(); g.gain.linearRampToValueAtTime(v,a.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d); o.stop(a.currentTime+d+0.02); }
+function fillSound(){ beep(430,0.12,'sine',0.06); }
 function ping(){ beep(600,0.12,'triangle'); }
 
 loadPage();
