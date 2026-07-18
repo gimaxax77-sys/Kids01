@@ -1,0 +1,133 @@
+<!-- 유아 자유탐색형 색칠놀이 - 선그림 영역을 탭해 색칠하기 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>색칠 놀이</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#fbf6ea; font-family:sans-serif; }
+  #stage { position:fixed; inset:0; display:flex; flex-direction:column; }
+
+  #topbar { display:flex; justify-content:center; align-items:center; gap:2.5vw; padding:calc(1vh + env(safe-area-inset-top)) 2vw 0.6vh; }
+  .theme { border:none; background:#fffdf7; border-radius:16px; cursor:pointer; width:1.7cm; height:1.7cm; max-width:15vw; max-height:8vh; font-size:6vw; line-height:1; box-shadow:0 2px 5px rgba(0,0,0,.15); display:flex; align-items:center; justify-content:center; }
+  .theme.on { background:#ffe7a3; transform:scale(1.12); }
+
+  #mid { flex:1; position:relative; }
+  #art { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  #art svg { width:95%; height:95%; }
+  #art .fillable { transition:fill .1s ease; }
+  #art .fillable:active { opacity:.85; }
+
+  /* 하단 색 팔레트 */
+  #palette { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:2.4vw; padding:1.2vh 2vw calc(1.2vh + env(safe-area-inset-bottom)); background:#efe9dc; }
+  .swatch { flex:0 0 auto; width:min(1.9cm, 14vw); aspect-ratio:1; border-radius:50%; border:2px solid rgba(0,0,0,.12); cursor:pointer; box-shadow:0 2px 5px rgba(0,0,0,.18); transition:transform .12s ease; }
+  .swatch.on { transform:scale(1.22); box-shadow:0 0 0 4px #fff, 0 3px 8px rgba(0,0,0,.3); }
+
+  /* 좌상단 홈 */
+  #home { position:fixed; top:calc(1.4vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:30; width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh; display:flex; align-items:center; justify-content:center; border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite; }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
+
+  /* 우상단: 새 그림 / 다시(지우기) */
+  #tools { position:fixed; top:calc(1.4vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:30; display:flex; gap:1.6vw; }
+  #tools button { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.5cm; height:1.5cm; max-width:11vw; max-height:6.5vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #tools button:active { transform:scale(.9); }
+
+  #note { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; color:#9a8c6a; font-size:4.5vw; text-align:center; padding:8vw; }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="topbar"></div>
+  <div id="mid"><div id="art"></div></div>
+  <div id="palette"></div>
+</div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+<div id="tools">
+  <button id="reset" aria-label="다시">🧽</button>
+  <button id="next" aria-label="새 그림">🔄</button>
+</div>
+
+<script>
+// 메인 앱과 동일한 SVG 빌더 (색칠공부/조각맞추기 팩 공용). 팩보다 먼저 정의(팩이 sunRays 사용)
+function shapeToTag(s, mode){
+  const attrStr = Object.entries(s.attrs).map(([k,v])=> k+'="'+v+'"').join(' ');
+  if(s.fillable){
+    const fill = mode==='outline' ? '#ffffff' : s.color;
+    return '<'+s.tag+' class="fillable" data-color="'+s.color+'" '+attrStr+' fill="'+fill+'" stroke="#333" stroke-width="5"/>';
+  }
+  if(s.tag==='line'){ return '<line '+attrStr+' stroke="'+(s.stroke||'#333')+'" stroke-width="3"/>'; }
+  if(s.tag==='path'){ return '<path '+attrStr+' stroke="'+(s.stroke||'#333')+'" stroke-width="4" fill="'+(s.fill||'none')+'"/>'; }
+  return '<'+s.tag+' '+attrStr+' fill="'+(s.fill||'#222')+'"/>';
+}
+function buildSvg(shapes, mode){ return '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">'+shapes.map(s=> shapeToTag(s,mode)).join('')+'</svg>'; }
+function sunRays(){ const r=[]; for(let i=0;i<8;i++) r.push({tag:'polygon', fillable:true, color:'#ffcc33', attrs:{points:'140,95 160,95 150,45', transform:'rotate('+(i*45)+' 150 150)'}}); return r; }
+</script>
+<script src="packs/core-pictures.js"></script>
+<script src="packs/theme-vehicles.js"></script>
+<script src="packs/theme-dinosaurs.js"></script>
+<script src="packs/theme-marvel-heroes.js"></script>
+
+<script>
+// id → 테마 매핑 (퍼즐과 동일 대상: 공룡/자동차/사물/캐릭터)
+const MAP = {
+  trex:'공룡', triceratops:'공룡', stego:'공룡', brachio:'공룡', ptero:'공룡',
+  car:'자동차', bus:'자동차', truck:'자동차', taxi:'자동차',
+  apple:'사물', house:'사물', fish:'사물', butterfly:'사물', sun:'사물', ball:'사물', umbrella:'사물', robot:'사물', plane:'사물', rocket:'사물',
+  ironman:'캐릭터', spiderman:'캐릭터', 'cap-america':'캐릭터', hulk:'캐릭터', thor:'캐릭터', blackpanther:'캐릭터',
+};
+const THEMES = [
+  { id:'공룡', icon:'🦕' }, { id:'자동차', icon:'🚗' }, { id:'사물', icon:'⚽' }, { id:'캐릭터', icon:'🦸' },
+];
+// 테마별 그림 목록
+const byTheme = {}; THEMES.forEach(t=> byTheme[t.id]=[]);
+CONTENT_PACKS.pictures.forEach(p=>{ const t=MAP[p.id]; if(t) byTheme[t].push(p); });
+
+const COLORS = ['#e23b3b','#ef7d1a','#f5c518','#3fae54','#4aa3df','#3b7de2','#9b4fd0','#ec5a92','#8d6e63','#333333','#ffffff'];
+let current = COLORS[0], themeIdx = 0, picIdx = 0;
+
+const art = document.getElementById('art');
+
+function loadPic(){
+  const pics = byTheme[THEMES[themeIdx].id];
+  if(!pics.length){ art.innerHTML = '<div id="note">그림이 없어요.</div>'; return; }
+  const pic = pics[picIdx % pics.length];
+  art.innerHTML = buildSvg(pic.shapes, 'outline');
+  art.querySelectorAll('.fillable').forEach(el=>{
+    el.style.cursor='pointer';
+    el.addEventListener('pointerdown', ()=>{ el.setAttribute('fill', current); fillSound(); });
+  });
+}
+
+// 상단 테마 버튼
+const topbar = document.getElementById('topbar');
+THEMES.forEach((t,i)=>{
+  const b=document.createElement('button'); b.className='theme'+(i===0?' on':''); b.textContent=t.icon; b.title=t.id;
+  b.addEventListener('click', ()=>{ themeIdx=i; picIdx=0; document.querySelectorAll('.theme').forEach(x=>x.classList.remove('on')); b.classList.add('on'); loadPic(); ping(); });
+  topbar.appendChild(b);
+});
+
+// 색 팔레트
+const palette = document.getElementById('palette');
+COLORS.forEach((c,i)=>{
+  const s=document.createElement('button'); s.className='swatch'+(i===0?' on':''); s.style.background=c; s.title=c;
+  s.addEventListener('pointerdown', (e)=>{ e.stopPropagation(); current=c; document.querySelectorAll('.swatch').forEach(x=>x.classList.remove('on')); s.classList.add('on'); ping(); });
+  palette.appendChild(s);
+});
+
+document.getElementById('next').addEventListener('click', ()=>{ picIdx++; loadPic(); ping(); });
+document.getElementById('reset').addEventListener('click', ()=>{ loadPic(); ping(); }); // 현재 그림 아웃라인으로 재렌더=지우기
+
+// --- 소리 ---
+let ac;
+function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
+function beep(f,d,type='sine',v=0.1){ const a=audio(),o=a.createOscillator(),g=a.createGain(); o.type=type;o.frequency.value=f;g.gain.value=0.001;o.connect(g).connect(a.destination);o.start(); g.gain.linearRampToValueAtTime(v,a.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d); o.stop(a.currentTime+d+0.02); }
+function fillSound(){ beep(430,0.14,'sine',0.09); }
+function ping(){ beep(600,0.12,'triangle'); }
+
+loadPic();
+</script>
+</body>
+</html>
