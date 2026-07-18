@@ -24,6 +24,10 @@
   .toy:nth-child(4){ animation-delay:1.8s; }
   .toy:nth-child(5){ animation-delay:2.4s; }
   .toy:nth-child(6){ animation-delay:3s; }
+  .toy:nth-child(7){ animation-delay:3.6s; }
+  .toy:nth-child(8){ animation-delay:4.2s; }
+  .toy:nth-child(9){ animation-delay:4.8s; }
+  .toy:nth-child(10){ animation-delay:5.4s; }
   .toy:active { transform:scale(.94); }
   .toy svg { width:100%; height:100%; }
   @keyframes bob { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-1.4vmin); } }
@@ -104,6 +108,42 @@
         <rect x="64" y="26" width="16" height="52" rx="7" fill="none" stroke="#b9c9d2" stroke-width="3"/>
         <rect x="66" y="46" width="12" height="30" rx="4" fill="#3fae54"/>
       </g>
+    </svg>
+  </a>
+  <!-- 숫자 세기 -->
+  <a class="toy" href="숫자놀이.html" aria-label="숫자 세기">
+    <svg viewBox="0 0 100 100">
+      <rect x="6" y="6" width="88" height="88" rx="18" fill="#eaf7ef"/>
+      <text x="50" y="66" font-size="52" font-weight="900" text-anchor="middle" fill="#3fae54" font-family="sans-serif">123</text>
+    </svg>
+  </a>
+  <!-- 그림자 맞추기 -->
+  <a class="toy" href="그림자놀이.html" aria-label="그림자 맞추기">
+    <svg viewBox="0 0 100 100">
+      <rect x="6" y="6" width="88" height="88" rx="18" fill="#eef0f6"/>
+      <circle cx="36" cy="40" r="18" fill="#b8bccd"/>
+      <circle cx="66" cy="62" r="18" fill="#f5c518"/>
+    </svg>
+  </a>
+  <!-- 선 따라 그리기 -->
+  <a class="toy" href="선그리기.html" aria-label="선 따라 그리기">
+    <svg viewBox="0 0 100 100">
+      <rect x="6" y="6" width="88" height="88" rx="18" fill="#fbf6ea"/>
+      <path d="M20 60 Q40 25 55 55 T85 45" fill="none" stroke="#c9cdd6" stroke-width="10" stroke-linecap="round"/>
+      <path d="M20 60 Q35 33 48 52" fill="none" stroke="#3b7de2" stroke-width="8" stroke-linecap="round"/>
+      <circle cx="20" cy="60" r="6" fill="#3fae54"/>
+    </svg>
+  </a>
+  <!-- 짝 맞추기 -->
+  <a class="toy" href="짝맞추기.html" aria-label="짝 맞추기">
+    <svg viewBox="0 0 100 100">
+      <rect x="6" y="6" width="88" height="88" rx="18" fill="#f3ecdb"/>
+      <rect x="20" y="24" width="24" height="32" rx="5" fill="#fffdf7" stroke="#7a5cd0" stroke-width="3"/>
+      <text x="32" y="47" font-size="18" text-anchor="middle">🍎</text>
+      <rect x="56" y="24" width="24" height="32" rx="5" fill="#7a5cd0"/>
+      <rect x="20" y="62" width="24" height="32" rx="5" fill="#7a5cd0"/>
+      <rect x="56" y="62" width="24" height="32" rx="5" fill="#fffdf7" stroke="#7a5cd0" stroke-width="3"/>
+      <text x="68" y="85" font-size="18" text-anchor="middle">🍎</text>
     </svg>
   </a>
 </div>
