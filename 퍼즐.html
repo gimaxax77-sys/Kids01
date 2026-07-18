@@ -84,13 +84,16 @@
 <a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
 <div id="diff"></div>
 
+<!-- 이미지 목록은 images/ 폴더에서 자동 생성됨(직접 수정 금지). 히어로는 저작권상 제외 -->
+<script src="packs/puzzle-manifest.js"></script>
 <script>
-// 테마: 안전한(오픈 라이선스) 이미지는 파일 목록 고정, 히어로는 로컬 폴더에서 탐지
+// 테마: 공룡/자동차/사물은 매니페스트에서, 히어로는 로컬 폴더에서 탐지
+const M = window.PUZZLE_IMAGES || {};
 const THEMES = [
-  { id:'공룡', icon:'🦕', dir:'images/공룡',   files:['trex.svg','sauropod.svg','dragon.svg'] },
-  { id:'자동차', icon:'🚗', dir:'images/자동차', files:['car.svg','taxi.svg','bus.svg','truck.svg','police.svg','pickup.svg'] },
-  { id:'사물', icon:'⚽', dir:'images/사물',   files:['apple.svg','ball.svg','balloon.svg','house.svg','gift.svg','star.svg','fish.svg','butterfly.svg'] },
-  { id:'히어로', icon:'🦸', dir:'images/히어로', files:[] }, // 로컬 탐지로 채움
+  { id:'공룡', icon:'🦕', files: M['공룡'] || [] },
+  { id:'자동차', icon:'🚗', files: M['자동차'] || [] },
+  { id:'사물', icon:'⚽', files: M['사물'] || [] },
+  { id:'히어로', icon:'🦸', files: [] }, // 로컬 탐지로 채움
 ];
 let themeIdx = 0, picIdx = 0, N = 2;
 
@@ -100,22 +103,20 @@ const tray = document.getElementById('tray');
 
 // 히어로 이미지 로컬 탐지(hero1..8, png/jpg) — 있는 것만 채택
 function probeHeroes() {
-  const cands = [];
+  // Gim이 직접 그린 히어로 SVG(로컬 전용) + 사용자가 넣은 hero1~8.png/jpg
+  const cands = ['pack-ironman','pack-spiderman','pack-cap-america','pack-hulk','pack-thor','pack-blackpanther']
+    .map(n => 'images/히어로/' + n + '.svg');
   for (let i = 1; i <= 8; i++) { cands.push('images/히어로/hero'+i+'.png'); cands.push('images/히어로/hero'+i+'.jpg'); }
   return Promise.all(cands.map(u => new Promise(res => {
     const im = new Image(); im.onload = () => res(u); im.onerror = () => res(null); im.src = u;
   }))).then(a => {
-    // hero번호 중복 제거(png 우선)
     const seen = new Set(), out = [];
-    a.filter(Boolean).forEach(u => { const key = u.replace(/\.(png|jpg)$/,''); if (!seen.has(key)) { seen.add(key); out.push(u); } });
+    a.filter(Boolean).forEach(u => { const key = u.replace(/\.[a-z]+$/i,''); if (!seen.has(key)) { seen.add(key); out.push(u); } });
     return out;
   });
 }
 
-function curImages() {
-  const t = THEMES[themeIdx];
-  return t.files.map(f => f.includes('/') ? f : t.dir + '/' + f);
-}
+function curImages() { return THEMES[themeIdx].files; }
 
 function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; } return a; }
 
