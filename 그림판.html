@@ -1,0 +1,196 @@
+<!-- 유아 자유탐색형 그림판(낙서 놀이) 프로토타입 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>그림판</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; overflow: hidden; touch-action: none; background: #efe9dc; }
+  #stage { position: fixed; inset: 0; display: flex; flex-direction: column; }
+  canvas { flex: 1; display: block; background: #fbf6ea; touch-action: none; }
+
+  /* 하단 팔레트 한 줄 */
+  #palette {
+    display: flex; align-items: center; justify-content: center; gap: 3.2vw;
+    padding: 1.6vh 3vw; background: #efe9dc;
+  }
+  .swatch {
+    width: 2.2cm; height: 2.2cm; max-width: 15vw; max-height: 9vh;
+    border-radius: 50%; border: none; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.18);
+    transition: transform .12s ease, box-shadow .12s ease;
+  }
+  .swatch.on { transform: scale(1.22); box-shadow: 0 0 0 5px #fff, 0 4px 10px rgba(0,0,0,.28); }
+
+  /* 우상단 전체 지우기 */
+  #clear {
+    position: fixed; top: 2.4vh; right: 3vw;
+    width: 1.9cm; height: 1.9cm; max-width: 13vw; max-height: 8vh;
+    border: none; border-radius: 50%; background: #fff;
+    font-size: 6vw; line-height: 1; cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0,0,0,.18);
+  }
+  #clear:active { transform: scale(.9); }
+
+  /* 지우기 시 새 종이가 스르륵 내려오는 연출 */
+  #wipe {
+    position: fixed; inset: 0; background: #fbf6ea;
+    transform: translateY(-100%); pointer-events: none;
+  }
+  #wipe.run { animation: wipe .5s ease forwards; }
+  @keyframes wipe { 0% { transform: translateY(-100%); } 55% { transform: translateY(0); } 100% { transform: translateY(100%); } }
+</style>
+</head>
+<body>
+<div id="stage">
+  <canvas id="c"></canvas>
+  <div id="palette"></div>
+</div>
+<button id="clear" aria-label="지우기">🧽</button>
+<div id="wipe"></div>
+
+<script>
+// 색·브러시 팔레트 정의. hue 브러시(무지개)와 neon(빛나는)은 특수 처리.
+const BRUSHES = [
+  { type: 'solid', color: '#e23b3b' },
+  { type: 'solid', color: '#f5a623' },
+  { type: 'solid', color: '#f7d038' },
+  { type: 'solid', color: '#3fae54' },
+  { type: 'solid', color: '#3b7de2' },
+  { type: 'solid', color: '#9b4fd0' },
+  { type: 'rainbow', color: 'conic-gradient(red,orange,yellow,green,blue,violet,red)' },
+  { type: 'neon', color: '#25d0e0' },
+];
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+let current = BRUSHES[4]; // 파랑 기본
+let hue = 0;
+
+// 고해상도 대응 + 리사이즈 시 그림 보존
+function fitCanvas() {
+  const dpr = window.devicePixelRatio || 1;
+  const w = canvas.clientWidth, h = canvas.clientHeight;
+  if (!w || !h) return; // 레이아웃 전엔 건너뜀
+  const snap = canvas.width ? ctx.getImageData(0, 0, canvas.width, canvas.height) : null;
+  canvas.width = w * dpr; canvas.height = h * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  if (snap) ctx.putImageData(snap, 0, 0);
+}
+window.addEventListener('resize', fitCanvas);
+
+// 팔레트 버튼 생성
+const palette = document.getElementById('palette');
+BRUSHES.forEach((b, i) => {
+  const el = document.createElement('button');
+  el.className = 'swatch' + (b === current ? ' on' : '');
+  el.style.background = b.color;
+  if (b.type === 'neon') el.style.boxShadow = `0 0 12px ${b.color}, 0 2px 6px rgba(0,0,0,.18)`;
+  el.addEventListener('pointerdown', (e) => {
+    e.stopPropagation();
+    current = b;
+    document.querySelectorAll('.swatch').forEach(s => s.classList.remove('on'));
+    el.classList.add('on');
+    ping(); // 색 고를 때도 소리
+  });
+  palette.appendChild(el);
+});
+
+// --- 그리기 ---
+let drawing = false, last = null;
+
+function pos(e) {
+  const r = canvas.getBoundingClientRect();
+  return { x: e.clientX - r.left, y: e.clientY - r.top };
+}
+
+function stroke(p) {
+  ctx.beginPath();
+  ctx.moveTo(last.x, last.y);
+  ctx.lineTo(p.x, p.y);
+  if (current.type === 'rainbow') {
+    hue = (hue + 6) % 360;
+    ctx.strokeStyle = `hsl(${hue},85%,55%)`;
+    ctx.shadowBlur = 0; ctx.lineWidth = 14;
+  } else if (current.type === 'neon') {
+    ctx.strokeStyle = current.color;
+    ctx.shadowColor = current.color; ctx.shadowBlur = 18; ctx.lineWidth = 10;
+  } else {
+    ctx.strokeStyle = current.color;
+    ctx.shadowBlur = 0; ctx.lineWidth = 16;
+  }
+  ctx.stroke();
+  last = p;
+}
+
+canvas.addEventListener('pointerdown', (e) => {
+  drawing = true; last = pos(e);
+  stroke({ x: last.x + 0.1, y: last.y + 0.1 }); // 탭 한 번에도 점이 찍히게
+  startTone();
+});
+canvas.addEventListener('pointermove', (e) => {
+  if (!drawing) return;
+  const p = pos(e);
+  stroke(p);
+  tone(p.y); // 소리 높낮이를 세로 위치에 연동
+});
+function endDraw() { drawing = false; stopTone(); ctx.shadowBlur = 0; }
+canvas.addEventListener('pointerup', endDraw);
+canvas.addEventListener('pointercancel', endDraw);
+canvas.addEventListener('pointerleave', endDraw);
+
+// --- 지우기 ---
+const wipe = document.getElementById('wipe');
+document.getElementById('clear').addEventListener('pointerdown', (e) => {
+  e.stopPropagation();
+  wipe.classList.remove('run'); void wipe.offsetWidth; wipe.classList.add('run');
+  setTimeout(() => ctx.clearRect(0, 0, canvas.width, canvas.height), 270); // 종이가 화면 덮은 순간 지움
+  ping();
+});
+
+// --- 소리: 그릴 때 잔잔한 톤(즉각 피드백) ---
+// ponytail: WebAudio 오실레이터 1개로 처리. 악기 샘플/폴리포니 필요해지면 그때 확장.
+let ac, osc, gain;
+function audio() {
+  if (!ac) { ac = new (window.AudioContext || window.webkitAudioContext)(); }
+  if (ac.state === 'suspended') ac.resume();
+  return ac;
+}
+function startTone() {
+  const a = audio();
+  osc = a.createOscillator(); gain = a.createGain();
+  osc.type = 'sine'; osc.frequency.value = 440;
+  gain.gain.value = 0; osc.connect(gain).connect(a.destination);
+  osc.start();
+  gain.gain.linearRampToValueAtTime(0.08, a.currentTime + 0.05);
+}
+function tone(y) {
+  if (!osc) return;
+  const h = canvas.clientHeight || 1;
+  const f = 660 - (y / h) * 400; // 위쪽=높은음, 아래쪽=낮은음
+  osc.frequency.setTargetAtTime(f, ac.currentTime, 0.02);
+}
+function stopTone() {
+  if (!osc) return;
+  gain.gain.linearRampToValueAtTime(0, ac.currentTime + 0.08);
+  osc.stop(ac.currentTime + 0.1);
+  osc = null;
+}
+function ping() { // 버튼용 짧은 소리
+  const a = audio();
+  const o = a.createOscillator(), g = a.createGain();
+  o.type = 'triangle'; o.frequency.value = 520;
+  g.gain.value = 0.001; o.connect(g).connect(a.destination); o.start();
+  g.gain.linearRampToValueAtTime(0.1, a.currentTime + 0.02);
+  g.gain.exponentialRampToValueAtTime(0.001, a.currentTime + 0.18);
+  o.stop(a.currentTime + 0.2);
+}
+
+requestAnimationFrame(fitCanvas);
+window.addEventListener('load', fitCanvas);
+</script>
+</body>
+</html>

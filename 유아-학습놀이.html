@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<!-- 유아용 색칠공부/조각맞추기/틀린그림찾기/한글/숫자 학습놀이 통합 도구 -->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>유아 학습놀이 - 색칠공부·조각맞추기·틀린그림찾기·한글·숫자</title>
+<style>
+  :root{
+    --bg:#fff8ef;
+    --panel:#ffffff;
+    --ink:#2b2b2b;
+    --line:#f0e4d0;
+    --accent:#ff6f61;
+    --accent2:#4aa3df;
+    --good:#2ecc71;
+    --bad:#e74c3c;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0;
+    font-family:"Segoe UI","Malgun Gothic",sans-serif;
+    background:var(--bg);
+    color:var(--ink);
+  }
+  header{
+    padding:18px 16px 4px;
+    text-align:center;
+  }
+  header h1{
+    margin:0 0 4px;
+    font-size:26px;
+  }
+  header p{
+    margin:0 0 14px;
+    color:#7a6a55;
+    font-size:14px;
+  }
+  .wrap{
+    max-width:760px;
+    margin:0 auto;
+    padding:0 12px 40px;
+  }
+  .age-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:6px;
+    justify-content:center;
+    align-items:center;
+    margin:0 0 14px;
+  }
+  .age-label{
+    font-size:13px;
+    color:#7a6a55;
+    margin-right:2px;
+  }
+  .age-btn{
+    border:2px solid var(--line);
+    background:#fff;
+    padding:6px 12px;
+    border-radius:10px;
+    font-size:13px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .age-btn.active{
+    background:var(--accent2);
+    border-color:var(--accent2);
+    color:#fff;
+  }
+  .tab-row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    justify-content:center;
+    margin-bottom:16px;
+  }
+  .tab-btn{
+    border:2px solid var(--line);
+    background:#fff;
+    padding:10px 16px;
+    border-radius:14px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  .tab-btn.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .tab-row.small{
+    margin-bottom:12px;
+  }
+  .tab-btn.small{
+    font-size:14px;
+    padding:6px 12px;
+    border-radius:10px;
+  }
+  .panel{
+    display:none;
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:18px;
+    padding:18px;
+  }
+  .panel.active{ display:block; }
+  .panel h2{
+    margin-top:0;
+    font-size:20px;
+  }
+  .row{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin-bottom:14px;
+  }
+  .pic-btn{
+    border:2px solid var(--line);
+    background:#fff;
+    padding:8px 14px;
+    border-radius:12px;
+    font-size:15px;
+    cursor:pointer;
+  }
+  .pic-btn.active{
+    border-color:var(--accent2);
+    background:#e8f4fc;
+  }
+  .color-swatch{
+    width:34px;
+    height:34px;
+    border-radius:50%;
+    border:3px solid #fff;
+    box-shadow:0 0 0 2px var(--line);
+    cursor:pointer;
+  }
+  .color-swatch.active{
+    box-shadow:0 0 0 3px var(--ink);
+  }
+  #coloringStage{
+    max-width:420px;
+    margin:0 auto;
+    background:#fff;
+    border:2px solid var(--line);
+    border-radius:12px;
+  }
+  #coloringStage svg{
+    width:100%;
+    height:auto;
+    display:block;
+  }
+  .fillable{ cursor:pointer; }
+  .btn{
+    border:none;
+    background:var(--accent2);
+    color:#fff;
+    padding:10px 16px;
+    border-radius:12px;
+    font-size:15px;
+    font-weight:600;
+    cursor:pointer;
+  }
+  .btn.alt{ background:var(--accent); }
+  .puzzle-layout{
+    display:flex;
+    flex-wrap:wrap;
+    gap:20px;
+    align-items:flex-start;
+    justify-content:center;
+  }
+  #puzzlePreview{
+    width:140px;
+    border-radius:10px;
+    border:2px solid var(--line);
+    opacity:.85;
+  }
+  #puzzleBoard{
+    display:grid;
+    gap:4px;
+    width:360px;
+    max-width:90vw;
+  }
+  .puzzle-slot{
+    aspect-ratio:1/1;
+    border:2px solid #fff;
+    outline:2px solid var(--line);
+    overflow:hidden;
+    cursor:pointer;
+  }
+  .puzzle-slot.selected{
+    outline:4px solid var(--accent);
+  }
+  .puzzle-slot img{
+    width:100%;
+    height:100%;
+    display:block;
+  }
+  #puzzleMsg{
+    font-size:18px;
+    font-weight:700;
+    color:var(--good);
+    min-height:26px;
+  }
+  .diff-layout{
+    display:flex;
+    flex-wrap:wrap;
+    gap:14px;
+    justify-content:center;
+  }
+  .diff-layout canvas{
+    border:2px solid var(--line);
+    border-radius:10px;
+    max-width:100%;
+    cursor:pointer;
+  }
+  #diffStatus{
+    font-size:17px;
+    font-weight:700;
+    text-align:center;
+    margin:12px 0;
+  }
+  .card-display{
+    text-align:center;
+    padding:20px 0;
+  }
+  .big-char{
+    font-size:96px;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .card-name{
+    font-size:22px;
+    margin-top:6px;
+  }
+  .emoji-row{
+    font-size:30px;
+    letter-spacing:6px;
+    margin:10px 0;
+    word-break:break-all;
+  }
+  .quiz-prompt{
+    font-size:20px;
+    font-weight:700;
+    text-align:center;
+    margin-bottom:12px;
+  }
+  .option-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+    max-width:360px;
+    margin:0 auto;
+  }
+  .option-btn{
+    font-size:24px;
+    padding:16px;
+    border-radius:12px;
+    border:2px solid var(--line);
+    background:#fff;
+    cursor:pointer;
+    font-weight:700;
+  }
+  .option-btn.correct{
+    background:#e2f9e1;
+    border-color:var(--good);
+  }
+  .option-btn.wrong{
+    background:#fde3e3;
+    border-color:var(--bad);
+  }
+  .quiz-score{
+    text-align:center;
+    margin-top:12px;
+    font-weight:700;
+  }
+  .word-book{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(90px,1fr));
+    gap:10px;
+  }
+  .word-card{
+    border:2px solid var(--line);
+    border-radius:12px;
+    padding:10px 6px;
+    text-align:center;
+    background:#fff;
+    cursor:pointer;
+  }
+  .word-char{
+    font-size:26px;
+    font-weight:700;
+    color:var(--accent);
+  }
+  .word-emoji{
+    font-size:24px;
+  }
+  .word-text{
+    font-size:13px;
+    margin-top:2px;
+  }
+  footer{
+    text-align:center;
+    color:#a08b6f;
+    font-size:12px;
+    padding:20px 0 6px;
+  }
+  .header-controls{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    gap:8px;
+    margin:6px 0 2px;
+  }
+  #starCount{
+    display:inline-block;
+    font-weight:700;
+    font-size:16px;
+    background:#fff;
+    border:2px solid var(--line);
+    border-radius:20px;
+    padding:6px 14px;
+  }
+  #starCount.pop{
+    animation: starPop 0.4s ease;
+  }
+  @keyframes starPop{
+    0%{ transform:scale(1); }
+    45%{ transform:scale(1.3); }
+    100%{ transform:scale(1); }
+  }
+  #bgmToggleBtn{
+    border:2px solid var(--line);
+    background:#fff;
+    border-radius:20px;
+    padding:6px 14px;
+    font-size:14px;
+    cursor:pointer;
+    font-weight:600;
+  }
+  #bgmToggleBtn.on{
+    background:var(--accent2);
+    border-color:var(--accent2);
+    color:#fff;
+  }
+  .confetti-piece{
+    position:fixed;
+    top:-12px;
+    width:10px;
+    height:14px;
+    opacity:0.9;
+    border-radius:2px;
+    animation-name:confettiFall;
+    animation-timing-function:ease-in;
+    animation-fill-mode:forwards;
+    pointer-events:none;
+    z-index:999;
+  }
+  @keyframes confettiFall{
+    0%{ transform:translateY(0) rotate(0deg); opacity:1; }
+    100%{ transform:translateY(100vh) rotate(360deg); opacity:0; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>🎨 유아 학습놀이</h1>
+  <p>색칠공부 · 조각 맞추기 · 틀린그림 찾기 · 한글 · 숫자공부</p>
+  <div class="header-controls">
+    <span id="starCount">⭐ 0</span>
+    <button id="bgmToggleBtn">🎵 배경음악 켜기</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="age-row" id="ageRow">
+    <span class="age-label">연령:</span>
+    <button class="age-btn active" data-age="all">전체</button>
+    <button class="age-btn" data-age="6-7">6~7세</button>
+    <button class="age-btn" data-age="8-9">8~9세</button>
+    <button class="age-btn" data-age="10+">10세 이상</button>
+  </div>
+  <div class="tab-row" id="mainTabRow">
+    <button class="tab-btn active" data-tab="coloring">🖍 색칠공부</button>
+    <button class="tab-btn" data-tab="puzzle">🧩 조각 맞추기</button>
+    <button class="tab-btn" data-tab="diff">🔍 틀린그림찾기</button>
+    <button class="tab-btn" data-tab="hangul">🇰🇷 한글</button>
+    <button class="tab-btn" data-tab="number">🔢 숫자공부</button>
+  </div>
+
+  <!-- 색칠공부 -->
+  <section class="panel active" id="panel-coloring">
+    <h2>🖍 색칠공부</h2>
+    <div class="row" id="coloringPicker"></div>
+    <div class="row" id="coloringPalette"></div>
+    <div id="coloringStage"></div>
+    <div class="row" style="margin-top:14px; justify-content:center;">
+      <button class="btn alt" id="coloringResetBtn">↺ 초기화</button>
+      <button class="btn" id="coloringSaveBtn">💾 그림 저장</button>
+    </div>
+  </section>
+
+  <!-- 조각 맞추기 -->
+  <section class="panel" id="panel-puzzle">
+    <h2>🧩 조각 맞추기</h2>
+    <p style="margin-top:-8px;color:#7a6a55;font-size:14px;">조각을 두 번 눌러서 자리를 바꿔 보세요!</p>
+    <div class="row" id="puzzlePicturePicker"></div>
+    <div class="row" id="puzzleSizePicker"></div>
+    <div class="row">
+      <button class="btn alt" id="puzzleShuffleBtn">🔀 다시 섞기</button>
+    </div>
+    <div class="puzzle-layout">
+      <img id="puzzlePreview" alt="완성 미리보기">
+      <div id="puzzleBoard"></div>
+    </div>
+    <div id="puzzleMsg"></div>
+  </section>
+
+  <!-- 틀린그림찾기 -->
+  <section class="panel" id="panel-diff">
+    <h2>🔍 틀린그림찾기</h2>
+    <p style="margin-top:-8px;color:#7a6a55;font-size:14px;">두 그림에서 다른 부분을 눌러서 찾아보세요!</p>
+    <div class="diff-layout">
+      <canvas id="diffCanvasLeft" width="320" height="320"></canvas>
+      <canvas id="diffCanvasRight" width="320" height="320"></canvas>
+    </div>
+    <div id="diffStatus">찾은 개수: 0 / 0</div>
+    <div class="row" style="justify-content:center;">
+      <button class="btn alt" id="diffHintBtn">💡 힌트</button>
+      <button class="btn" id="diffNextBtn">➡ 다음 그림</button>
+    </div>
+  </section>
+
+  <!-- 한글 -->
+  <section class="panel" id="panel-hangul">
+    <h2>🇰🇷 한글놀이</h2>
+    <div class="tab-row small" id="hangulModeRow">
+      <button class="tab-btn small active" data-mode="card">🗂 플래시카드</button>
+      <button class="tab-btn small" data-mode="word">📖 단어장</button>
+      <button class="tab-btn small" data-mode="quiz">❓ 퀴즈</button>
+    </div>
+    <div id="hangulCardMode">
+      <div class="card-display">
+        <div class="big-char" id="hangulChar">ㄱ</div>
+        <div class="card-name" id="hangulName">기역</div>
+      </div>
+      <div class="row" style="justify-content:center;">
+        <button class="btn alt" id="hangulPrevBtn">◀ 이전</button>
+        <button class="btn" id="hangulSpeakBtn">🔊 소리 듣기</button>
+        <button class="btn alt" id="hangulNextBtn">다음 ▶</button>
+      </div>
+    </div>
+    <div id="hangulWordMode" style="display:none;">
+      <div class="row" id="hangulWordPackPicker" style="display:none;"></div>
+      <div id="hangulWordBook" class="word-book"></div>
+    </div>
+    <div id="hangulQuizMode" style="display:none;">
+      <div class="quiz-prompt" id="hangulQuizPrompt"></div>
+      <div class="option-grid" id="hangulQuizOptions"></div>
+      <div class="quiz-score" id="hangulQuizScore">점수: 0 / 0</div>
+    </div>
+  </section>
+
+  <!-- 숫자공부 -->
+  <section class="panel" id="panel-number">
+    <h2>🔢 숫자공부</h2>
+    <div class="tab-row small" id="numberModeRow">
+      <button class="tab-btn small active" data-mode="card">🗂 플래시카드</button>
+      <button class="tab-btn small" data-mode="quiz">❓ 퀴즈</button>
+    </div>
+    <div class="row" id="numberThemePicker"></div>
+    <div id="numberCardMode">
+      <div class="card-display">
+        <div class="big-char" id="numberDigit">1</div>
+        <div class="card-name" id="numberWord">하나</div>
+        <div class="emoji-row" id="numberEmojis">⭐</div>
+      </div>
+      <div class="row" style="justify-content:center;">
+        <button class="btn alt" id="numberPrevBtn">◀ 이전</button>
+        <button class="btn" id="numberSpeakBtn">🔊 소리 듣기</button>
+        <button class="btn alt" id="numberNextBtn">다음 ▶</button>
+      </div>
+    </div>
+    <div id="numberQuizMode" style="display:none;">
+      <div class="quiz-prompt">몇 개일까요?</div>
+      <div class="emoji-row" id="numberQuizEmojis" style="text-align:center;"></div>
+      <div class="option-grid" id="numberQuizOptions"></div>
+      <div class="quiz-score" id="numberQuizScore">점수: 0 / 0</div>
+    </div>
+  </section>
+
+  <footer>유아 학습놀이 · 브라우저에서 바로 동작하는 오프라인 도구</footer>
+</div>
+
+<script>
+  // ============================================================
+  // 엔진 파트 1/2 - 콘텐츠 팩이 로드되기 전에 준비돼야 하는 것들.
+  // 새 콘텐츠 팩 추가 방법:
+  //   1) packs/ 폴더에 새 .js 파일을 만들고, 아래 CONTENT_PACKS.xxx.push(...)로 항목을 등록한다.
+  //      (예: window.CONTENT_PACKS.pictures.push({id, name, emoji, ageMin, ageMax, shapes:[...]}))
+  //   2) 이 HTML 파일의 <script src="packs/..."> 목록에 새 파일 한 줄만 추가한다.
+  //   3) 항목마다 ageMin/ageMax(정수, 나이)를 넣으면 상단 연령 선택 필터에 자동으로 반영된다.
+  //   그 외 엔진 코드(렌더링/퀴즈/터치 로직)는 수정할 필요 없음 - 콘텐츠와 엔진이 분리되어 있음.
+  // ============================================================
+  const $ = id => document.getElementById(id);
+
+  window.CONTENT_PACKS = window.CONTENT_PACKS || { pictures: [], scenes: [], numberThemes: [], hangulWordPacks: [] };
+
+  const AGE_TIERS = { all:[0,99], '6-7':[6,7], '8-9':[8,9], '10+':[10,99] };
+  // TIER_LEVEL: 콘텐츠 팩 필터와 별개로, 퍼즐 난이도/퀴즈 보기 개수/한글·숫자 학습 범위처럼
+  // "같은 콘텐츠를 얼마나 어렵게 낼지"를 정하는 난이도 단계(1=쉬움, 2=보통, 3=어려움/전체).
+  const TIER_LEVEL = { all:3, '6-7':1, '8-9':2, '10+':3 };
+  let selectedAge = 'all';
+  function isVisibleForAge(item){
+    if(selectedAge==='all') return true;
+    const [lo,hi] = AGE_TIERS[selectedAge];
+    const itemLo = item.ageMin ?? 0, itemHi = item.ageMax ?? 99;
+    return itemLo<=hi && itemHi>=lo;
+  }
+
+  function speak(text){
+    if(!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = 'ko-KR';
+    u.rate = 0.9;
+    window.speechSynthesis.speak(u);
+  }
+
+  function shuffleArray(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]] = [arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function pickOptions(all, correct, count){
+    const pool = all.filter(v=> v!==correct);
+    shuffleArray(pool);
+    return shuffleArray([correct, ...pool.slice(0,count-1)]);
+  }
+
+  function renderOptions(container, options, correctValue, formatLabel, onResult){
+    container.innerHTML = '';
+    const buttons = options.map(opt=>{
+      const btn = document.createElement('button');
+      btn.className = 'option-btn';
+      btn.textContent = formatLabel(opt);
+      btn.addEventListener('click', ()=>{
+        const isCorrect = opt === correctValue;
+        buttons.forEach(entry=>{
+          entry.btn.disabled = true;
+          if(entry.opt === correctValue) entry.btn.classList.add('correct');
+          else if(entry.btn === btn) entry.btn.classList.add('wrong');
+        });
+        onResult(isCorrect);
+      });
+      container.appendChild(btn);
+      return {btn, opt};
+    });
+  }
+
+  // ---------- 사운드 / 컨페티 / 별점 연출 ----------
+  let audioCtx = null;
+  function getAudioCtx(){
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    return audioCtx;
+  }
+  function playTone(freq, duration, type, gainVal, delay){
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain).connect(ctx.destination);
+    const t0 = ctx.currentTime + (delay||0);
+    gain.gain.setValueAtTime(gainVal||0.15, t0);
+    gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+    osc.start(t0);
+    osc.stop(t0+duration+0.02);
+  }
+  function playCorrectSound(){
+    playTone(523.25, 0.12, 'sine', 0.18, 0);
+    playTone(659.25, 0.15, 'sine', 0.18, 0.12);
+    playTone(783.99, 0.2, 'sine', 0.18, 0.24);
+  }
+  function playWrongSound(){
+    playTone(220, 0.25, 'sawtooth', 0.12, 0);
+  }
+  function playCompleteSound(){
+    [523.25,659.25,783.99,1046.5].forEach((f,i)=> playTone(f,0.18,'triangle',0.18,i*0.1));
+  }
+
+  const BGM_NOTES = [523.25,587.33,659.25,783.99,880.00,783.99,659.25,587.33];
+  let bgmTimer = null, bgmStep = 0, bgmOn = false;
+  function bgmTick(){
+    playTone(BGM_NOTES[bgmStep % BGM_NOTES.length], 0.35, 'sine', 0.06, 0);
+    bgmStep++;
+  }
+  function startBgm(){
+    if(bgmTimer) return;
+    bgmOn = true;
+    bgmTick();
+    bgmTimer = setInterval(bgmTick, 420);
+  }
+  function stopBgm(){
+    bgmOn = false;
+    clearInterval(bgmTimer);
+    bgmTimer = null;
+  }
+  $('bgmToggleBtn').addEventListener('click', ()=>{
+    const btn = $('bgmToggleBtn');
+    if(bgmOn){
+      stopBgm();
+      btn.textContent = '🎵 배경음악 켜기';
+      btn.classList.remove('on');
+    } else {
+      startBgm();
+      btn.textContent = '🔇 배경음악 끄기';
+      btn.classList.add('on');
+    }
+  });
+
+  function confettiBurst(count){
+    const colors = ['#ff6f61','#ffcc33','#4caf50','#4aa3df','#c66fd1'];
+    for(let i=0;i<(count||24);i++){
+      const el = document.createElement('div');
+      el.className = 'confetti-piece';
+      el.style.left = (Math.random()*100)+'vw';
+      el.style.background = colors[Math.floor(Math.random()*colors.length)];
+      el.style.animationDuration = (1.2+Math.random()*0.8)+'s';
+      el.style.animationDelay = (Math.random()*0.3)+'s';
+      document.body.appendChild(el);
+      setTimeout(()=> el.remove(), 2300);
+    }
+  }
+
+  let starCount = 0;
+  function addStars(n){
+    starCount += n;
+    const el = $('starCount');
+    el.textContent = '⭐ ' + starCount;
+    el.classList.remove('pop');
+    void el.offsetWidth;
+    el.classList.add('pop');
+  }
+
+  // ---------- 메인 탭 ----------
+  function switchTab(name){
+    document.querySelectorAll('#mainTabRow .tab-btn').forEach(b=> b.classList.toggle('active', b.dataset.tab===name));
+    document.querySelectorAll('.panel').forEach(p=> p.classList.toggle('active', p.id === 'panel-'+name));
+  }
+  document.querySelectorAll('#mainTabRow .tab-btn').forEach(b=> b.addEventListener('click', ()=> switchTab(b.dataset.tab)));
+
+  function setupSubTabs(rowId, panelMap){
+    document.querySelectorAll('#'+rowId+' button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('#'+rowId+' button').forEach(b=> b.classList.remove('active'));
+        btn.classList.add('active');
+        Object.entries(panelMap).forEach(([key, el])=>{
+          el.style.display = (key===btn.dataset.mode) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  // ---------- SVG 그림 빌더 (색칠공부 / 조각맞추기 팩이 공용으로 사용) ----------
+  function shapeToTag(s, mode){
+    const attrStr = Object.entries(s.attrs).map(([k,v])=> k+'="'+v+'"').join(' ');
+    if(s.fillable){
+      const fill = mode==='outline' ? '#ffffff' : s.color;
+      return '<'+s.tag+' class="fillable" data-color="'+s.color+'" '+attrStr+' fill="'+fill+'" stroke="#333" stroke-width="5"/>';
+    }
+    if(s.tag==='line'){
+      return '<line '+attrStr+' stroke="'+(s.stroke||'#333')+'" stroke-width="3"/>';
+    }
+    if(s.tag==='path'){
+      return '<path '+attrStr+' stroke="'+(s.stroke||'#333')+'" stroke-width="4" fill="'+(s.fill||'none')+'"/>';
+    }
+    return '<'+s.tag+' '+attrStr+' fill="'+(s.fill||'#222')+'"/>';
+  }
+  function buildSvg(shapes, mode){
+    return '<svg viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">'+shapes.map(s=> shapeToTag(s,mode)).join('')+'</svg>';
+  }
+  function sunRays(){
+    const rays=[];
+    for(let i=0;i<8;i++){
+      rays.push({tag:'polygon', fillable:true, color:'#ffcc33', attrs:{points:'140,95 160,95 150,45', transform:'rotate('+(i*45)+' 150 150)'}});
+    }
+    return rays;
+  }
+</script>
+
+<!-- 콘텐츠 팩 로드 (script 태그 기반 - file://로 직접 열어도 동작) -->
+<script src="packs/core-pictures.js"></script>
+<script src="packs/core-scenes.js"></script>
+<script src="packs/core-number-themes.js"></script>
+<script src="packs/core-hangul-words.js"></script>
+<script src="packs/theme-dinosaurs.js"></script>
+<script src="packs/theme-marvel-heroes.js"></script>
+
+<script>
+  // ============================================================
+  // 엔진 파트 2/2 - 콘텐츠 팩이 전부 로드된 뒤 실행되는 나머지 로직.
+  // ============================================================
+  function visiblePictures(){ return CONTENT_PACKS.pictures.filter(isVisibleForAge); }
+  function visibleScenes(){ return CONTENT_PACKS.scenes.filter(isVisibleForAge); }
+  function visibleNumberThemes(){ return CONTENT_PACKS.numberThemes.filter(isVisibleForAge); }
+  function visibleHangulWordPacks(){ return CONTENT_PACKS.hangulWordPacks.filter(isVisibleForAge); }
+
+  // 연령 단계(TIER_LEVEL)에 따라 달라지는 난이도 값들
+  function maxPuzzleSize(){ return {1:3, 2:4, 3:5}[TIER_LEVEL[selectedAge]]; }
+  function quizOptionCount(){ return {1:2, 2:3, 3:4}[TIER_LEVEL[selectedAge]]; }
+  function numberRange(){ return {1:5, 2:10, 3:20}[TIER_LEVEL[selectedAge]]; }
+
+  const COLORS = ['#e6483c','#ffcc33','#4caf50','#4aa3df','#c66fd1','#7a4a20','#ff8a3d','#222222','#9b4fae','#ffffff'];
+
+  // ---------- 색칠공부 ----------
+  const coloringState = { pictureId: visiblePictures()[0].id, color: COLORS[0] };
+
+  function renderColoringPicker(){
+    const wrap = $('coloringPicker');
+    wrap.innerHTML = '';
+    visiblePictures().forEach(p=>{
+      const btn = document.createElement('button');
+      btn.className = 'pic-btn' + (p.id===coloringState.pictureId ? ' active' : '');
+      btn.textContent = p.emoji + ' ' + p.name;
+      btn.addEventListener('click', ()=>{
+        coloringState.pictureId = p.id;
+        renderColoringPicker();
+        renderColoringStage();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderColoringPalette(){
+    const wrap = $('coloringPalette');
+    wrap.innerHTML = '';
+    COLORS.forEach(c=>{
+      const btn = document.createElement('button');
+      btn.className = 'color-swatch' + (c===coloringState.color ? ' active' : '');
+      btn.style.background = c;
+      btn.title = c;
+      btn.addEventListener('click', ()=>{
+        coloringState.color = c;
+        renderColoringPalette();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderColoringStage(){
+    const picture = CONTENT_PACKS.pictures.find(p=> p.id===coloringState.pictureId);
+    $('coloringStage').innerHTML = buildSvg(picture.shapes, 'outline');
+  }
+
+  $('coloringStage').addEventListener('click', e=>{
+    if(e.target.classList.contains('fillable')){
+      e.target.setAttribute('fill', coloringState.color);
+    }
+  });
+
+  $('coloringResetBtn').addEventListener('click', ()=>{
+    document.querySelectorAll('#coloringStage .fillable').forEach(el=> el.setAttribute('fill', '#ffffff'));
+  });
+
+  $('coloringSaveBtn').addEventListener('click', ()=>{
+    const svgEl = $('coloringStage').querySelector('svg');
+    const svgStr = new XMLSerializer().serializeToString(svgEl);
+    const blob = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{
+      const canvas = document.createElement('canvas');
+      canvas.width = 600; canvas.height = 600;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0,0,600,600);
+      ctx.drawImage(img,0,0,600,600);
+      URL.revokeObjectURL(url);
+      canvas.toBlob(pngBlob=>{
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(pngBlob);
+        a.download = '색칠공부-'+coloringState.pictureId+'.png';
+        a.click();
+      });
+      addStars(2);
+      playCompleteSound();
+      confettiBurst(16);
+    };
+    img.src = url;
+  });
+
+  // ---------- 조각 맞추기 ----------
+  const puzzleState = { pictureId: visiblePictures()[0].id, size:3, order:[], selected:null, pieceUrls:[] };
+
+  function isSolved(order){ return order.every((v,i)=> v===i); }
+
+  function buildPuzzle(){
+    const picture = CONTENT_PACKS.pictures.find(p=> p.id===puzzleState.pictureId);
+    const svgStr = buildSvg(picture.shapes, 'colored');
+    const blob = new Blob([svgStr], {type:'image/svg+xml;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = ()=>{
+      const N = puzzleState.size;
+      const full = 600;
+      const srcCanvas = document.createElement('canvas');
+      srcCanvas.width = full; srcCanvas.height = full;
+      const sctx = srcCanvas.getContext('2d');
+      sctx.fillStyle = '#ffffff';
+      sctx.fillRect(0,0,full,full);
+      sctx.drawImage(img,0,0,full,full);
+      URL.revokeObjectURL(url);
+      $('puzzlePreview').src = srcCanvas.toDataURL();
+
+      const pieceSize = full / N;
+      const urls = [];
+      for(let i=0;i<N*N;i++){
+        const sx = (i%N)*pieceSize, sy = Math.floor(i/N)*pieceSize;
+        const pc = document.createElement('canvas');
+        pc.width = pieceSize; pc.height = pieceSize;
+        pc.getContext('2d').drawImage(srcCanvas, sx, sy, pieceSize, pieceSize, 0, 0, pieceSize, pieceSize);
+        urls.push(pc.toDataURL());
+      }
+      puzzleState.pieceUrls = urls;
+      let order = Array.from({length:N*N}, (_,i)=>i);
+      do { shuffleArray(order); } while(isSolved(order));
+      puzzleState.order = order;
+      puzzleState.selected = null;
+      $('puzzleMsg').textContent = '';
+      renderPuzzleBoard();
+    };
+    img.src = url;
+  }
+
+  function renderPuzzleBoard(){
+    const N = puzzleState.size;
+    const board = $('puzzleBoard');
+    board.style.gridTemplateColumns = 'repeat('+N+', 1fr)';
+    board.innerHTML = '';
+    puzzleState.order.forEach((pieceId, slotIndex)=>{
+      const cell = document.createElement('div');
+      cell.className = 'puzzle-slot' + (puzzleState.selected===slotIndex ? ' selected' : '');
+      const img = document.createElement('img');
+      img.src = puzzleState.pieceUrls[pieceId];
+      cell.appendChild(img);
+      cell.addEventListener('click', ()=> handlePuzzleClick(slotIndex));
+      board.appendChild(cell);
+    });
+  }
+
+  function handlePuzzleClick(slotIndex){
+    if(puzzleState.selected===null){
+      puzzleState.selected = slotIndex;
+    } else if(puzzleState.selected === slotIndex){
+      puzzleState.selected = null;
+    } else {
+      const o = puzzleState.order;
+      const tmp = o[puzzleState.selected];
+      o[puzzleState.selected] = o[slotIndex];
+      o[slotIndex] = tmp;
+      puzzleState.selected = null;
+      if(isSolved(o)){
+        $('puzzleMsg').textContent = '🎉 완성했어요! 참 잘했어요!';
+        speak('완성했어요. 참 잘했어요!');
+        playCompleteSound();
+        confettiBurst(24);
+        addStars(3);
+      }
+    }
+    renderPuzzleBoard();
+  }
+
+  function renderPuzzlePicker(){
+    const wrap = $('puzzlePicturePicker');
+    wrap.innerHTML = '';
+    visiblePictures().forEach(p=>{
+      const btn = document.createElement('button');
+      btn.className = 'pic-btn' + (p.id===puzzleState.pictureId ? ' active' : '');
+      btn.textContent = p.emoji + ' ' + p.name;
+      btn.addEventListener('click', ()=>{
+        puzzleState.pictureId = p.id;
+        renderPuzzlePicker();
+        buildPuzzle();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderPuzzleSizePicker(){
+    const wrap = $('puzzleSizePicker');
+    wrap.innerHTML = '';
+    const max = maxPuzzleSize();
+    [3,4,5].filter(n=> n<=max).forEach(n=>{
+      const btn = document.createElement('button');
+      btn.className = 'pic-btn' + (n===puzzleState.size ? ' active' : '');
+      btn.textContent = n+' x '+n;
+      btn.addEventListener('click', ()=>{
+        puzzleState.size = n;
+        renderPuzzleSizePicker();
+        buildPuzzle();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  $('puzzleShuffleBtn').addEventListener('click', buildPuzzle);
+
+  // ---------- 틀린그림찾기 ----------
+  const diffState = { sceneIndex:0, scene:null, diffs:[], found:[] };
+
+  function drawShape(ctx, obj, useDiff){
+    const color = (useDiff && obj.diffColor) ? obj.diffColor : obj.color;
+    const scale = (useDiff && obj.diffScale) ? obj.diffScale : 1;
+    ctx.fillStyle = color;
+    if(obj.type==='circle'){
+      ctx.beginPath();
+      ctx.arc(obj.x, obj.y, obj.r*scale, 0, Math.PI*2);
+      ctx.fill();
+    } else if(obj.type==='rect'){
+      const w = obj.w*scale, h = obj.h*scale;
+      ctx.fillRect(obj.x-w/2, obj.y-h/2, w, h);
+    } else if(obj.type==='triangle'){
+      const s = obj.r*scale;
+      ctx.beginPath();
+      ctx.moveTo(obj.x, obj.y-s);
+      ctx.lineTo(obj.x-s, obj.y+s);
+      ctx.lineTo(obj.x+s, obj.y+s);
+      ctx.closePath();
+      ctx.fill();
+    }
+  }
+
+  function drawScene(canvas, scene, useDiff){
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    ctx.fillStyle = scene.background;
+    ctx.fillRect(0,0,canvas.width,canvas.height);
+    scene.objects.forEach(o=> drawShape(ctx,o,useDiff));
+  }
+
+  function drawFoundMarker(canvas, x, y, r){
+    const ctx = canvas.getContext('2d');
+    ctx.save();
+    ctx.strokeStyle = '#2ecc71';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.stroke();
+    ctx.restore();
+  }
+
+  function getDiffs(scene){
+    return scene.objects
+      .filter(o=> o.diffColor || o.diffScale)
+      .map(o=> ({x:o.x, y:o.y, r:(o.r || Math.max(o.w||0,o.h||0)/2) + 14}));
+  }
+
+  function updateDiffStatus(){
+    const total = diffState.diffs.length;
+    const found = diffState.found.filter(Boolean).length;
+    let text = '찾은 개수: '+found+' / '+total;
+    if(found===total){
+      text += '  🎉 모두 찾았어요!';
+      speak('모두 찾았어요! 참 잘했어요!');
+      playCompleteSound();
+      confettiBurst(24);
+      addStars(3);
+    }
+    $('diffStatus').textContent = text;
+  }
+
+  function loadDiffScene(index){
+    const vScenes = visibleScenes();
+    diffState.sceneIndex = index;
+    diffState.scene = vScenes[index];
+    diffState.diffs = getDiffs(diffState.scene);
+    diffState.found = diffState.diffs.map(()=> false);
+    drawScene($('diffCanvasLeft'), diffState.scene, false);
+    drawScene($('diffCanvasRight'), diffState.scene, true);
+    updateDiffStatus();
+  }
+
+  function handleDiffClick(e, canvas){
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+    const x = (e.clientX-rect.left)*scaleX;
+    const y = (e.clientY-rect.top)*scaleY;
+    let hit = -1;
+    diffState.diffs.forEach((d,i)=>{
+      if(diffState.found[i]) return;
+      if(Math.hypot(d.x-x, d.y-y) <= d.r) hit = i;
+    });
+    if(hit>=0){
+      diffState.found[hit] = true;
+      const d = diffState.diffs[hit];
+      drawFoundMarker($('diffCanvasLeft'), d.x, d.y, d.r-10);
+      drawFoundMarker($('diffCanvasRight'), d.x, d.y, d.r-10);
+      updateDiffStatus();
+    }
+  }
+
+  $('diffCanvasLeft').addEventListener('click', e=> handleDiffClick(e, $('diffCanvasLeft')));
+  $('diffCanvasRight').addEventListener('click', e=> handleDiffClick(e, $('diffCanvasRight')));
+
+  $('diffHintBtn').addEventListener('click', ()=>{
+    const idx = diffState.found.findIndex(f=> !f);
+    if(idx<0) return;
+    const d = diffState.diffs[idx];
+    [$('diffCanvasLeft'), $('diffCanvasRight')].forEach(canvas=>{
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.strokeStyle = '#ff5252';
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.arc(d.x, d.y, d.r, 0, Math.PI*2);
+      ctx.stroke();
+      ctx.restore();
+      setTimeout(()=>{
+        const isRight = canvas === $('diffCanvasRight');
+        drawScene(canvas, diffState.scene, isRight);
+        diffState.diffs.forEach((dd,i)=>{
+          if(diffState.found[i]) drawFoundMarker(canvas, dd.x, dd.y, dd.r-10);
+        });
+      }, 900);
+    });
+  });
+
+  $('diffNextBtn').addEventListener('click', ()=>{
+    const vScenes = visibleScenes();
+    loadDiffScene((diffState.sceneIndex+1) % vScenes.length);
+  });
+
+  // ---------- 한글놀이 ----------
+  // 자음/모음 순서(ㄱㄴㄷㄹ...ㅎ / ㅏㅑㅓ...ㅣ)는 언어 규칙 자체라 팩으로 분리하지 않고 고정.
+  // 각 글자에 연결되는 예시 단어/이모지만 CONTENT_PACKS.hangulWordPacks로 교체 가능.
+  const hangulAll = [
+    {ch:'ㄱ',name:'기역'},{ch:'ㄴ',name:'니은'},{ch:'ㄷ',name:'디귿'},{ch:'ㄹ',name:'리을'},
+    {ch:'ㅁ',name:'미음'},{ch:'ㅂ',name:'비읍'},{ch:'ㅅ',name:'시옷'},{ch:'ㅇ',name:'이응'},
+    {ch:'ㅈ',name:'지읒'},{ch:'ㅊ',name:'치읓'},{ch:'ㅋ',name:'키읔'},{ch:'ㅌ',name:'티읕'},
+    {ch:'ㅍ',name:'피읖'},{ch:'ㅎ',name:'히읗'},
+    {ch:'ㅏ',name:'아'},{ch:'ㅑ',name:'야'},{ch:'ㅓ',name:'어'},{ch:'ㅕ',name:'여'},
+    {ch:'ㅗ',name:'오'},{ch:'ㅛ',name:'요'},{ch:'ㅜ',name:'우'},{ch:'ㅠ',name:'유'},
+    {ch:'ㅡ',name:'으'},{ch:'ㅣ',name:'이'}
+  ];
+  let hangulCardIndex = 0;
+  let hangulWordPackId = (CONTENT_PACKS.hangulWordPacks[0] || {}).id || null;
+
+  // 3~4세는 자음 14개까지만, 5~6세/7세 이상/전체는 자음+모음 24개 전부 학습 범위로 사용
+  function visibleHangul(){
+    return TIER_LEVEL[selectedAge]===1 ? hangulAll.slice(0,14) : hangulAll;
+  }
+
+  function getWordInfo(ch){
+    const pack = CONTENT_PACKS.hangulWordPacks.find(p=> p.id===hangulWordPackId);
+    if(pack && pack.words[ch]) return pack.words[ch];
+    const core = CONTENT_PACKS.hangulWordPacks[0];
+    return (core && core.words[ch]) || {word:'', emoji:'❓'};
+  }
+
+  function renderHangulWordPackPicker(){
+    const wrap = $('hangulWordPackPicker');
+    const vPacks = visibleHangulWordPacks();
+    if(vPacks.length<=1){ wrap.style.display='none'; wrap.innerHTML=''; return; }
+    wrap.style.display='';
+    wrap.innerHTML='';
+    vPacks.forEach(p=>{
+      const btn = document.createElement('button');
+      btn.className = 'pic-btn' + (p.id===hangulWordPackId ? ' active' : '');
+      btn.textContent = p.name;
+      btn.addEventListener('click', ()=>{
+        hangulWordPackId = p.id;
+        renderHangulWordPackPicker();
+        renderHangulWordBook();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderHangulWordBook(){
+    const wrap = $('hangulWordBook');
+    wrap.innerHTML = '';
+    visibleHangul().forEach(item=>{
+      const info = getWordInfo(item.ch);
+      const card = document.createElement('button');
+      card.className = 'word-card';
+      card.innerHTML = '<div class="word-char">'+item.ch+'</div>'
+        + '<div class="word-emoji">'+info.emoji+'</div>'
+        + '<div class="word-text">'+info.word+'</div>';
+      card.addEventListener('click', ()=> speak(info.word));
+      wrap.appendChild(card);
+    });
+  }
+
+  function renderHangulCard(){
+    const list = visibleHangul();
+    if(hangulCardIndex >= list.length) hangulCardIndex = 0;
+    const item = list[hangulCardIndex];
+    $('hangulChar').textContent = item.ch;
+    $('hangulName').textContent = item.name;
+  }
+  $('hangulPrevBtn').addEventListener('click', ()=>{
+    const len = visibleHangul().length;
+    hangulCardIndex = (hangulCardIndex-1+len)%len;
+    renderHangulCard();
+  });
+  $('hangulNextBtn').addEventListener('click', ()=>{
+    const len = visibleHangul().length;
+    hangulCardIndex = (hangulCardIndex+1)%len;
+    renderHangulCard();
+  });
+  $('hangulSpeakBtn').addEventListener('click', ()=> speak(visibleHangul()[hangulCardIndex].name));
+
+  const hangulQuiz = {correct:0, total:0};
+  function nextHangulQuestion(){
+    const list = visibleHangul();
+    const item = list[Math.floor(Math.random()*list.length)];
+    $('hangulQuizPrompt').textContent = "'"+item.name+"' 글자를 찾아보세요";
+    const options = pickOptions(list.map(h=> h.ch), item.ch, Math.min(quizOptionCount(), list.length));
+    renderOptions($('hangulQuizOptions'), options, item.ch, v=>v, (isCorrect)=>{
+      hangulQuiz.total++;
+      if(isCorrect) hangulQuiz.correct++;
+      $('hangulQuizScore').textContent = '점수: '+hangulQuiz.correct+' / '+hangulQuiz.total;
+      speak(isCorrect ? '정답이에요!' : '아쉬워요. 정답은 '+item.ch+' 이에요.');
+      if(isCorrect){ playCorrectSound(); addStars(1); } else { playWrongSound(); }
+      setTimeout(nextHangulQuestion, 1400);
+    });
+  }
+
+  // ---------- 숫자공부 ----------
+  const numberWords = [
+    '하나','둘','셋','넷','다섯','여섯','일곱','여덟','아홉','열',
+    '열하나','열둘','열셋','열넷','열다섯','열여섯','열일곱','열여덟','열아홉','스물'
+  ];
+  const numbers = numberWords.map((w,i)=> ({n:i+1, word:w}));
+  let numberCardIndex = 0;
+  let numberThemeId = visibleNumberThemes()[0].id;
+
+  // 3~4세는 1~5, 5~6세는 1~10, 7세 이상/전체는 1~20까지 범위로 학습
+  function visibleNumbers(){ return numbers.slice(0, numberRange()); }
+
+  function currentNumberTheme(){
+    return CONTENT_PACKS.numberThemes.find(t=> t.id===numberThemeId) || visibleNumberThemes()[0];
+  }
+
+  function renderNumberThemePicker(){
+    const wrap = $('numberThemePicker');
+    wrap.innerHTML = '';
+    visibleNumberThemes().forEach(t=>{
+      const btn = document.createElement('button');
+      btn.className = 'pic-btn' + (t.id===numberThemeId ? ' active' : '');
+      btn.textContent = t.emoji + ' ' + t.name;
+      btn.addEventListener('click', ()=>{
+        numberThemeId = t.id;
+        renderNumberThemePicker();
+        renderNumberCard();
+      });
+      wrap.appendChild(btn);
+    });
+  }
+
+  function renderNumberCard(){
+    const list = visibleNumbers();
+    if(numberCardIndex >= list.length) numberCardIndex = 0;
+    const item = list[numberCardIndex];
+    $('numberDigit').textContent = item.n;
+    $('numberWord').textContent = item.word;
+    $('numberEmojis').textContent = currentNumberTheme().emoji.repeat(item.n);
+  }
+  $('numberPrevBtn').addEventListener('click', ()=>{
+    const len = visibleNumbers().length;
+    numberCardIndex = (numberCardIndex-1+len)%len;
+    renderNumberCard();
+  });
+  $('numberNextBtn').addEventListener('click', ()=>{
+    const len = visibleNumbers().length;
+    numberCardIndex = (numberCardIndex+1)%len;
+    renderNumberCard();
+  });
+  $('numberSpeakBtn').addEventListener('click', ()=> speak(visibleNumbers()[numberCardIndex].word));
+
+  const numberQuiz = {correct:0, total:0};
+  function nextNumberQuestion(){
+    const list = visibleNumbers();
+    const item = list[Math.floor(Math.random()*list.length)];
+    $('numberQuizEmojis').textContent = currentNumberTheme().emoji.repeat(item.n);
+    const options = pickOptions(list.map(x=> x.n), item.n, Math.min(quizOptionCount(), list.length));
+    renderOptions($('numberQuizOptions'), options, item.n, v=> String(v), (isCorrect)=>{
+      numberQuiz.total++;
+      if(isCorrect) numberQuiz.correct++;
+      $('numberQuizScore').textContent = '점수: '+numberQuiz.correct+' / '+numberQuiz.total;
+      speak(isCorrect ? '정답이에요!' : '아쉬워요. 정답은 '+item.n+' 이에요.');
+      if(isCorrect){ playCorrectSound(); addStars(1); } else { playWrongSound(); }
+      setTimeout(nextNumberQuestion, 1400);
+    });
+  }
+
+  // ---------- 연령 필터 ----------
+  function onAgeChange(tier){
+    selectedAge = tier;
+    document.querySelectorAll('#ageRow .age-btn').forEach(b=> b.classList.toggle('active', b.dataset.age===tier));
+
+    if(!visiblePictures().find(p=> p.id===coloringState.pictureId)) coloringState.pictureId = visiblePictures()[0].id;
+    renderColoringPicker();
+    renderColoringStage();
+
+    if(!visiblePictures().find(p=> p.id===puzzleState.pictureId)) puzzleState.pictureId = visiblePictures()[0].id;
+    if(puzzleState.size > maxPuzzleSize()) puzzleState.size = maxPuzzleSize();
+    renderPuzzlePicker();
+    renderPuzzleSizePicker();
+    buildPuzzle();
+
+    loadDiffScene(0);
+
+    if(!visibleNumberThemes().find(t=> t.id===numberThemeId)) numberThemeId = visibleNumberThemes()[0].id;
+    renderNumberThemePicker();
+    renderNumberCard();
+    nextNumberQuestion();
+
+    if(!visibleHangulWordPacks().find(p=> p.id===hangulWordPackId)){
+      const fallback = visibleHangulWordPacks()[0] || CONTENT_PACKS.hangulWordPacks[0];
+      hangulWordPackId = fallback ? fallback.id : null;
+    }
+    renderHangulWordPackPicker();
+    renderHangulWordBook();
+    renderHangulCard();
+    nextHangulQuestion();
+  }
+  document.querySelectorAll('#ageRow .age-btn').forEach(b=> b.addEventListener('click', ()=> onAgeChange(b.dataset.age)));
+
+  // ---------- 초기화 ----------
+  renderColoringPicker();
+  renderColoringPalette();
+  renderColoringStage();
+
+  renderPuzzlePicker();
+  renderPuzzleSizePicker();
+  buildPuzzle();
+
+  loadDiffScene(0);
+
+  setupSubTabs('hangulModeRow', {card:$('hangulCardMode'), word:$('hangulWordMode'), quiz:$('hangulQuizMode')});
+  renderHangulCard();
+  renderHangulWordPackPicker();
+  renderHangulWordBook();
+  nextHangulQuestion();
+
+  setupSubTabs('numberModeRow', {card:$('numberCardMode'), quiz:$('numberQuizMode')});
+  renderNumberThemePicker();
+  renderNumberCard();
+  nextNumberQuestion();
+</script>
+</body>
+</html>
