@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>그림판</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; -webkit-user-select: none; user-select: none; -webkit-tap-highlight-color: transparent; }
@@ -11,13 +11,13 @@
   #stage { position: fixed; inset: 0; display: flex; flex-direction: column; }
   canvas { flex: 1; display: block; background: #fbf6ea; touch-action: none; }
 
-  /* 하단 팔레트 한 줄 */
+  /* 하단 팔레트: 좁으면 두 줄로 감싸고, 원은 비율 고정 */
   #palette {
-    display: flex; align-items: center; justify-content: center; gap: 3.2vw;
-    padding: 1.6vh 3vw; background: #efe9dc;
+    display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 2.6vw;
+    padding: 1.4vh 3vw calc(1.4vh + env(safe-area-inset-bottom)); background: #efe9dc;
   }
   .swatch {
-    width: 2.2cm; height: 2.2cm; max-width: 15vw; max-height: 9vh;
+    flex: 0 0 auto; width: min(2.2cm, 17vw); aspect-ratio: 1;
     border-radius: 50%; border: none; cursor: pointer;
     box-shadow: 0 2px 6px rgba(0,0,0,.18);
     transition: transform .12s ease, box-shadow .12s ease;
@@ -26,7 +26,7 @@
 
   /* 우상단 전체 지우기 */
   #clear {
-    position: fixed; top: 2.4vh; right: 3vw;
+    position: fixed; top: calc(2.4vh + env(safe-area-inset-top)); right: calc(3vw + env(safe-area-inset-right));
     width: 1.9cm; height: 1.9cm; max-width: 13vw; max-height: 8vh;
     border: none; border-radius: 50%; background: #fff;
     font-size: 6vw; line-height: 1; cursor: pointer;
@@ -36,7 +36,7 @@
 
   /* 좌상단 홈(놀이방으로) — 늘 보이며 살짝 숨쉬듯 움직임 */
   #home {
-    position: fixed; top: 2.4vh; left: 3vw; z-index: 10;
+    position: fixed; top: calc(2.4vh + env(safe-area-inset-top)); left: calc(3vw + env(safe-area-inset-left)); z-index: 10;
     width: 1.7cm; height: 1.7cm; max-width: 12vw; max-height: 7vh;
     display: flex; align-items: center; justify-content: center;
     border-radius: 50%; background: #fff; text-decoration: none; font-size: 6vw;

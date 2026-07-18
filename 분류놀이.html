@@ -3,7 +3,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>분류 놀이</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
@@ -34,7 +34,7 @@
   @keyframes wiggle { 0%,100%{ transform:translateY(0) rotate(-2deg); } 50%{ transform:translateY(-4%) rotate(2deg); } }
 
   /* 하단 난이도 점 버튼 (칸 수 2/3/4) */
-  #diff { position:fixed; left:50%; bottom:1.6vh; transform:translateX(-50%); display:flex; gap:3.5vw; }
+  #diff { position:fixed; left:50%; bottom:calc(1.6vh + env(safe-area-inset-bottom)); transform:translateX(-50%); display:flex; gap:3.5vw; }
   #diff button {
     border:none; background:#e6dcc4; border-radius:50%; cursor:pointer;
     width:1.4cm; height:1.4cm; max-width:11vw; max-height:6.5vh;
@@ -46,7 +46,7 @@
 
   /* 좌상단 홈(놀이방으로) */
   #home {
-    position:fixed; top:2.2vh; left:3vw; z-index:20;
+    position:fixed; top:calc(2.2vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:20;
     width:1.7cm; height:1.7cm; max-width:12vw; max-height:7vh;
     display:flex; align-items:center; justify-content:center;
     border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw;
@@ -57,7 +57,7 @@
 
   /* 색/모양 모드 토글 (우상단) */
   #mode {
-    position:fixed; top:2.2vh; right:3vw; border:none; border-radius:50%; cursor:pointer;
+    position:fixed; top:calc(2.2vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); border:none; border-radius:50%; cursor:pointer;
     width:1.9cm; height:1.9cm; max-width:13vw; max-height:8vh; background:#fff;
     font-size:5.5vw; line-height:1; box-shadow:0 2px 6px rgba(0,0,0,.18);
   }
@@ -148,12 +148,13 @@ function deal() {
   shuffle(items);
   const is = itemSize();
   const per = items.length;
+  const cols = Math.ceil(per / 2); // 2줄 격자로 배치 → 좁은 폰에서 가로 겹침 방지
   items.forEach((key, i) => {
     const el = document.createElement('div');
     el.className = 'item';
-    const gapUnit = w / (per + 1);
-    const x = gapUnit * (i + 1);
-    const y = h * (0.62 + (i % 2) * 0.16);
+    const col = i % cols, row = Math.floor(i / cols);
+    const x = (w / (cols + 1)) * (col + 1);
+    const y = h * (0.6 + row * 0.18);
     el.style.width = el.style.height = is + 'px';
     el.style.left = (x - is/2) + 'px';
     el.style.top  = (y - is/2) + 'px';
