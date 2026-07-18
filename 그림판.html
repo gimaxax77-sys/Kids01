@@ -34,6 +34,17 @@
   }
   #clear:active { transform: scale(.9); }
 
+  /* 좌상단 홈(놀이방으로) — 늘 보이며 살짝 숨쉬듯 움직임 */
+  #home {
+    position: fixed; top: 2.4vh; left: 3vw; z-index: 10;
+    width: 1.7cm; height: 1.7cm; max-width: 12vw; max-height: 7vh;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%; background: #fff; text-decoration: none; font-size: 6vw;
+    box-shadow: 0 2px 6px rgba(0,0,0,.18); animation: breathe 3s ease-in-out infinite;
+  }
+  #home:active { transform: scale(.9); }
+  @keyframes breathe { 0%,100%{ transform: scale(1); } 50%{ transform: scale(1.08); } }
+
   /* 지우기 시 새 종이가 스르륵 내려오는 연출 */
   #wipe {
     position: fixed; inset: 0; background: #fbf6ea;
@@ -48,6 +59,7 @@
   <canvas id="c"></canvas>
   <div id="palette"></div>
 </div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
 <button id="clear" aria-label="지우기">🧽</button>
 <div id="wipe"></div>
 

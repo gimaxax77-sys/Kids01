@@ -1,0 +1,54 @@
+<!-- 유아 자유탐색형 놀이방 홈 - 장난감을 모아 고르는 메인 화면 -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>놀이방</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; background:#f3ecdb; }
+  #room {
+    position:fixed; inset:0; display:flex; flex-wrap:wrap;
+    align-items:center; justify-content:center; gap:6vmin; padding:6vmin;
+  }
+  .toy {
+    display:block; width:34vmin; height:34vmin; max-width:340px; max-height:340px;
+    border:none; border-radius:28px; cursor:pointer; background:#fffdf7;
+    box-shadow:0 8px 20px rgba(0,0,0,.14);
+    animation:bob 3.2s ease-in-out infinite;
+    transition:transform .15s ease;
+  }
+  .toy:nth-child(2){ animation-delay:.6s; }
+  .toy:active { transform:scale(.94); }
+  .toy svg { width:100%; height:100%; }
+  @keyframes bob { 0%,100%{ transform:translateY(0); } 50%{ transform:translateY(-1.4vmin); } }
+</style>
+</head>
+<body>
+<div id="room">
+  <!-- 그림판: 색색의 낙서 -->
+  <a class="toy" href="그림판.html" aria-label="그림판">
+    <svg viewBox="0 0 100 100">
+      <rect x="6" y="6" width="88" height="88" rx="18" fill="#fbf6ea"/>
+      <path d="M20 68 Q35 30 50 60 T80 40" fill="none" stroke="#e23b3b" stroke-width="7" stroke-linecap="round"/>
+      <path d="M22 80 Q40 60 60 78 T82 66" fill="none" stroke="#3b7de2" stroke-width="7" stroke-linecap="round"/>
+      <path d="M26 44 Q44 26 66 34" fill="none" stroke="#f5c518" stroke-width="7" stroke-linecap="round"/>
+      <circle cx="74" cy="26" r="7" fill="#3fae54"/>
+    </svg>
+  </a>
+  <!-- 분류놀이: 도형이 칸으로 -->
+  <a class="toy" href="분류놀이.html" aria-label="분류 놀이">
+    <svg viewBox="0 0 100 100">
+      <rect x="6" y="6" width="88" height="88" rx="18" fill="#fbf6ea"/>
+      <rect x="16" y="58" width="30" height="30" rx="7" fill="none" stroke="#3b7de2" stroke-width="4" stroke-dasharray="6 5"/>
+      <rect x="54" y="58" width="30" height="30" rx="7" fill="none" stroke="#e23b3b" stroke-width="4" stroke-dasharray="6 5"/>
+      <circle cx="31" cy="73" r="11" fill="#3b7de2"/>
+      <polygon points="69,64 80,83 58,83" fill="#e23b3b"/>
+      <circle cx="34" cy="26" r="10" fill="#f5c518"/>
+      <polygon points="66,16 76,34 56,34" fill="#3fae54"/>
+    </svg>
+  </a>
+</div>
+</body>
+</html>

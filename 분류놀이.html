@@ -17,6 +17,9 @@
   .bin .target { width:70%; height:70%; opacity:.35; }
   .bin.glow { animation:glow .5s ease; }
   @keyframes glow { 50% { transform:scale(1.15); } }
+  /* 담긴 것 토큰: 칸 아래쪽에 쌓여 진행이 보이게 */
+  .token { position:absolute; bottom:6%; animation:pop .35s cubic-bezier(.3,1.5,.5,1); }
+  @keyframes pop { 0%{ transform:scale(0); } 100%{ transform:scale(1); } }
 
   .item {
     position:absolute; touch-action:none; cursor:grab;
@@ -25,6 +28,10 @@
   }
   .item.dragging { transition:none; cursor:grabbing; filter:drop-shadow(0 10px 12px rgba(0,0,0,.3)); z-index:50; }
   .item.gone { transform:scale(.2); opacity:0; }
+  /* 아이템이 살짝 흔들려 "만져봐" 신호 (드래그·사라짐 중엔 정지) */
+  .item svg { display:block; animation:wiggle 2.6s ease-in-out infinite; }
+  .item.dragging svg, .item.gone svg { animation:none; }
+  @keyframes wiggle { 0%,100%{ transform:translateY(0) rotate(-2deg); } 50%{ transform:translateY(-4%) rotate(2deg); } }
 
   /* 하단 난이도 점 버튼 (칸 수 2/3/4) */
   #diff { position:fixed; left:50%; bottom:1.6vh; transform:translateX(-50%); display:flex; gap:3.5vw; }
@@ -37,6 +44,17 @@
   #diff button.on { background:#cdbd97; transform:scale(1.12); }
   #diff button i { width:6px; height:6px; border-radius:50%; background:#6b5b39; display:block; }
 
+  /* 좌상단 홈(놀이방으로) */
+  #home {
+    position:fixed; top:2.2vh; left:3vw; z-index:20;
+    width:1.7cm; height:1.7cm; max-width:12vw; max-height:7vh;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw;
+    box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite;
+  }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.08); } }
+
   /* 색/모양 모드 토글 (우상단) */
   #mode {
     position:fixed; top:2.2vh; right:3vw; border:none; border-radius:50%; cursor:pointer;
@@ -48,6 +66,7 @@
 </head>
 <body>
 <div id="stage"></div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
 <button id="mode" aria-label="모드">🎨</button>
 <div id="diff">
   <button data-n="2" aria-label="쉬움"><i></i><i></i></button>
@@ -182,6 +201,7 @@ function attachDrag(el) {
       el.style.top  = (hit.cy - bs*0.28) + 'px';
       el.classList.add('gone');
       hit.el.classList.remove('glow'); void hit.el.offsetWidth; hit.el.classList.add('glow');
+      addToken(hit, el.dataset.key);
       happy();
       setTimeout(() => { el.remove(); if (!stage.querySelector('.item')) win(); }, 300);
     } else {
@@ -190,6 +210,20 @@ function attachDrag(el) {
       blip();
     }
   });
+}
+
+// 담긴 아이템을 칸 아래에 작은 토큰으로 쌓기
+function addToken(bin, key) {
+  const n = bin.el.querySelectorAll('.token').length;
+  const size = binSize() * 0.26;
+  const tok = document.createElement('div');
+  tok.className = 'token';
+  tok.style.width = tok.style.height = size + 'px';
+  tok.style.left = (12 + n * 38) + '%';
+  tok.innerHTML = (mode === 'color')
+    ? shapeSVG('circle', COLORS.find(c => c.key === key).hex, size)
+    : shapeSVG(key, NEUTRAL, size);
+  bin.el.appendChild(tok);
 }
 
 // 전부 담으면: 잔잔한 축하 후 새 판
