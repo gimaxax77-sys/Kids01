@@ -152,6 +152,14 @@ Drawing for Kids(Bimi Boo, 2~5, 광고없음) / Todli(2~5, 오프라인 단계�
 - 이미지 저작권 — 공룡·자동차·사물은 OpenMoji(CC BY-SA 4.0) 오픈 이미지 번들(images/, CREDITS.md). 히어로는 마블 저작권상 공개 배포 불가 → images/히어로/를 .gitignore로 제외, 사용자가 hero1.png~hero8.png를 로컬에 넣으면 퍼즐이 자동 탐지(개인용). Gim 선택: 실제 이미지 비공개·개인용만.
 - 검증(실배포 모바일) — 조각 맞춤·완성·다음그림·오답복귀·난이도16·히어로 안내문 모두 정상. hero1.png=404로 공개 차단 확인.
 
+### 퍼즐 콘텐츠 대폭 확장 (2026-07-19)
+- 수량 — 공룡 3→12, 자동차 6→21, 사물 8→47 (히어로는 로컬 6 + 사용자 추가).
+- 소스1 OpenMoji 대량 추가(자동차 탈것류, 사물 음식/과일/자연/물건, 공룡 생물).
+- 소스2 packs 원본 그림 재사용 — Node 생성기(scratchpad/gen-svg.js)로 core-pictures·dinosaurs·marvel-heroes의 shapes를 buildSvg로 독립 SVG 변환(pack-*.svg). 공룡5·사물10·히어로6.
+- 이미지 목록 — 손으로 안 쓰고 Node 스캐너(gen-manifest.js)가 images/ 스캔해 packs/puzzle-manifest.js 자동 생성. 퍼즐이 window.PUZZLE_IMAGES 읽음. 히어로는 저작권상 매니페스트 제외, 로컬 probe(pack 히어로 svg + hero1~8.png/jpg)로 처리.
+- 검증(실배포) — 매니페스트 200, 공룡12·자동차21·사물47, 각 테마 첫 이미지 로드 성공.
+- 재생성 방법 — 이미지 추가/삭제 후 `node scripts/gen-manifest.js` 재실행. packs 그림 추가/변경 시 `node scripts/gen-svg.js` 먼저. (생성기는 저장소 scripts/ 에 포함.)
+
 ### GitHub Pages 배포 (2026-07-19)
 - 배포 주소 — https://gimaxax77-sys.github.io/Kids01/ (index.html → 놀이방.html 리다이렉트).
 - 방법 — 로컬 저장 자격증명(git credential fill) 토큰으로 REST API POST /repos/.../pages (source: main, /). gh CLI 없이 처리.

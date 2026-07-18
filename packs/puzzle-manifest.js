@@ -1,4 +1,4 @@
-// 퍼즐 이미지 매니페스트 (gen-manifest.js로 자동 생성 - 직접 수정 금지)
+// 퍼즐 이미지 매니페스트 (scripts/gen-manifest.js로 자동 생성 - 직접 수정 금지)
 window.PUZZLE_IMAGES = {
  "공룡": [
   "images/공룡/crocodile.svg",
