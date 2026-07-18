@@ -80,6 +80,19 @@
 
   .slot.win { animation:glow .6s ease; }
   @keyframes glow { 50%{ transform:scale(1.12);} }
+
+  /* 다음그림 / 그림고르기 도구 (상단 바 안) */
+  #tools { display:flex; gap:1.6vw; }
+  #tools button { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.5cm; height:1.5cm; max-width:12vw; max-height:8vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #tools button:active { transform:scale(.9); }
+
+  /* 그림 고르기 오버레이 */
+  #gallery { position:fixed; inset:0; z-index:100; background:rgba(30,24,14,.55); display:none; }
+  #gallery.open { display:block; }
+  #gallery .gclose { position:absolute; top:calc(2vh + env(safe-area-inset-top)); right:4vw; width:11vw; height:11vw; max-width:52px; max-height:52px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:6vw; cursor:pointer; box-shadow:0 2px 6px rgba(0,0,0,.25); }
+  #gallery .ggrid { position:absolute; inset:0; padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(4vh + env(safe-area-inset-bottom)); overflow-y:auto; display:grid; grid-template-columns:repeat(auto-fill, minmax(24vw,1fr)); gap:3vw; align-content:start; }
+  #gallery .thumb { background:#fff; border-radius:14px; aspect-ratio:1; background-size:contain; background-repeat:no-repeat; background-position:center; box-shadow:0 2px 6px rgba(0,0,0,.2); cursor:pointer; }
+  #gallery .thumb:active { transform:scale(.94); }
 </style>
 </head>
 <body>
@@ -88,10 +101,16 @@
     <a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
     <div id="themes"></div>
     <div id="diff"></div>
+    <div id="tools">
+      <button id="gallery-btn" aria-label="그림 고르기">📑</button>
+      <button id="next" aria-label="다음 그림">🔄</button>
+    </div>
   </div>
   <div id="mid"><div id="board"></div></div>
   <div id="tray"></div>
 </div>
+<!-- 그림 고르기(썸네일) -->
+<div id="gallery"><div class="gclose">✕</div><div class="ggrid"></div></div>
 <!-- 캐릭터: 아무 이름·아무 확장자 이미지나 선택 -->
 <input id="filepick" type="file" multiple hidden>
 <div id="charctl" style="display:none">
@@ -285,6 +304,28 @@ const diff = document.getElementById('diff');
     loadPuzzle(); ping();
   });
   diff.appendChild(b);
+});
+
+// 다음 그림(완성 안 해도 넘김)
+document.getElementById('next').addEventListener('click', () => {
+  const imgs = curImages(); if(!imgs.length){ if(themeIdx===CHAR) filepick.click(); return; }
+  picIdx = (picIdx + 1) % imgs.length; loadPuzzle(); ping();
+});
+
+// 그림 고르기(썸네일)
+const gallery = document.getElementById('gallery');
+gallery.querySelector('.gclose').addEventListener('click', () => gallery.classList.remove('open'));
+gallery.addEventListener('click', (e) => { if(e.target === gallery) gallery.classList.remove('open'); });
+document.getElementById('gallery-btn').addEventListener('click', () => {
+  const imgs = curImages(); const grid = gallery.querySelector('.ggrid'); grid.innerHTML = '';
+  if(!imgs.length){ if(themeIdx===CHAR) filepick.click(); return; }
+  imgs.forEach((src, i) => {
+    const d = document.createElement('div'); d.className = 'thumb';
+    d.style.backgroundImage = `url("${src}")`;
+    d.addEventListener('click', () => { picIdx = i; gallery.classList.remove('open'); loadPuzzle(); ping(); });
+    grid.appendChild(d);
+  });
+  gallery.classList.add('open'); ping();
 });
 
 window.addEventListener('resize', () => loadPuzzle());
