@@ -146,6 +146,12 @@ Drawing for Kids(Bimi Boo, 2~5, 광고없음) / Todli(2~5, 오프라인 단계�
 ### 반성 메모
 - 직전 턴에서 결정 질문을 산문으로 물어 소통 규칙 5번(선택박스) 위반 → 이후 결정 지점은 반드시 AskUserQuestion 사용.
 
+### 세 번째 장난감: 조각맞추기 퍼즐(웹 이미지) (2026-07-19)
+- 방향 전환 — Gim 요청으로 SVG·팩 기반 퍼즐 폐기, 웹 이미지 기반으로 새로 제작. theme-vehicles.js 삭제. 메인 앱(유아-학습놀이.html)의 기존 퍼즐은 레거시라 미변경.
+- 파일 — `퍼즐.html`. 이미지를 N×N 격자로 잘라(CSS 퍼센트 배경 슬라이스) 조각을 드래그해 맞춤. 테마(공룡/자동차/사물/히어로), 난이도 4/9/16조각. 정답=슬롯 스냅·잠금, 오답=벌 없이 트레이 복귀, 완성=축하 후 다음 그림.
+- 이미지 저작권 — 공룡·자동차·사물은 OpenMoji(CC BY-SA 4.0) 오픈 이미지 번들(images/, CREDITS.md). 히어로는 마블 저작권상 공개 배포 불가 → images/히어로/를 .gitignore로 제외, 사용자가 hero1.png~hero8.png를 로컬에 넣으면 퍼즐이 자동 탐지(개인용). Gim 선택: 실제 이미지 비공개·개인용만.
+- 검증(실배포 모바일) — 조각 맞춤·완성·다음그림·오답복귀·난이도16·히어로 안내문 모두 정상. hero1.png=404로 공개 차단 확인.
+
 ### GitHub Pages 배포 (2026-07-19)
 - 배포 주소 — https://gimaxax77-sys.github.io/Kids01/ (index.html → 놀이방.html 리다이렉트).
 - 방법 — 로컬 저장 자격증명(git credential fill) 토큰으로 REST API POST /repos/.../pages (source: main, /). gh CLI 없이 처리.
