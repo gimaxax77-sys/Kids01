@@ -72,25 +72,24 @@
 <script src="packs/color-manifest.js"></script>
 <script>
 const P = window.COLOR_PAGES || {};
-const CHAR = 3; // 캐릭터 = 개인 업로드(퍼즐과 저장 공유)
 const THEMES = [
-  { id:'공룡', icon:'🦕', files:P['공룡']||[] },
-  { id:'자동차', icon:'🚗', files:P['자동차']||[] },
-  { id:'사물', icon:'⚽', files:P['사물']||[] },
-  { id:'캐릭터', icon:'🦸', files:[] }, // 아래에서 업로드분 채움
+  { id:'공룡', icon:'🦕' }, { id:'자동차', icon:'🚗' }, { id:'사물', icon:'⚽' }, { id:'캐릭터', icon:'🦸' },
 ];
-// 개인 업로드 이미지: 브라우저(localStorage)에만 저장(퍼즐과 공유), 업로드·배포 없음
-function loadChars(){ try { return JSON.parse(localStorage.getItem('charImages')||'[]'); } catch(e){ return []; } }
-function saveChars(a){ try { localStorage.setItem('charImages', JSON.stringify(a)); } catch(e){} }
-THEMES[CHAR].files = loadChars();
+// 기본 도안 + 테마별 개인 업로드(브라우저 localStorage에만 저장, 배포 없음). 캐릭터는 퍼즐과 공유.
+const DEFAULTS = { '공룡':P['공룡']||[], '자동차':P['자동차']||[], '사물':P['사물']||[], '캐릭터':[] };
+function upKey(id){ return id==='캐릭터' ? 'charImages' : 'colorUp_'+id; }
+function loadUp(id){ try { return JSON.parse(localStorage.getItem(upKey(id))||'[]'); } catch(e){ return []; } }
+function saveUp(id,a){ try { localStorage.setItem(upKey(id), JSON.stringify(a)); } catch(e){} }
+function curId(){ return THEMES[themeIdx].id; }
+function curFiles(){ return DEFAULTS[curId()].concat(loadUp(curId())); }
 function addFiles(list){
   const files=[...list]; if(!files.length) return;
   let pending=files.length; const added=[];
   const done=()=>{ if(--pending===0) finish(); };
   files.forEach(f=>{ const rd=new FileReader(); rd.onload=()=>{ const im=new Image(); im.onload=()=>{added.push(rd.result);done();}; im.onerror=done; im.src=rd.result; }; rd.onerror=done; rd.readAsDataURL(f); });
-  function finish(){ if(!added.length) return; THEMES[CHAR].files=THEMES[CHAR].files.concat(added); saveChars(THEMES[CHAR].files); picIdx=0; if(themeIdx===CHAR) loadPage(); ping(); }
+  function finish(){ if(!added.length) return; const id=curId(); saveUp(id, loadUp(id).concat(added)); picIdx=0; loadPage(); ping(); }
 }
-function clearChars(){ THEMES[CHAR].files=[]; saveChars([]); picIdx=0; if(themeIdx===CHAR) loadPage(); }
+function clearUp(){ saveUp(curId(), []); picIdx=0; loadPage(); }
 const COLORS = ['#e23b3b','#ef7d1a','#f5c518','#3fae54','#4aa3df','#3b7de2','#9b4fd0','#ec5a92','#8d6e63','#333333','#ffffff'];
 let current = COLORS[0], themeIdx = 0, picIdx = 0;
 const RES = 560;
@@ -112,9 +111,9 @@ function clearPaint(){ pctx.fillStyle = '#ffffff'; pctx.fillRect(0,0,RES,RES); }
 
 // 선그림 로드: width/height 주입해 blob으로(위 레이어 img)
 async function loadPage(){
-  const files = THEMES[themeIdx].files;
+  const files = curFiles();
   fitBox(); clearPaint(); updateCharCtl(); removePickNote();
-  if(!files.length){ lines.removeAttribute('src'); if(themeIdx===CHAR) showPickNote(); return; }
+  if(!files.length){ lines.removeAttribute('src'); showPickNote(); return; }
   const src = files[picIdx % files.length];
   if(src.startsWith('data:')){ lines.src = src; return; } // 업로드 이미지는 그대로 위 레이어로
   try {
@@ -132,7 +131,7 @@ function showPickNote(){
   b.onclick=()=>filepick.click(); n.appendChild(b);
   document.getElementById('artwrap').appendChild(n);
 }
-function updateCharCtl(){ document.getElementById('charctl').style.display = (themeIdx===CHAR && THEMES[CHAR].files.length>0) ? 'flex' : 'none'; }
+function updateCharCtl(){ document.getElementById('charctl').style.display = 'flex'; document.getElementById('charclear').style.display = loadUp(curId()).length ? '' : 'none'; }
 
 // --- 문질러 칠하기 ---
 let drawing = false, last = null;
@@ -166,7 +165,7 @@ COLORS.forEach((c,i)=>{
   palette.appendChild(s);
 });
 
-document.getElementById('next').addEventListener('click', ()=>{ const f=THEMES[themeIdx].files; if(f.length){ picIdx=(picIdx+1)%f.length; loadPage(); ping(); } });
+document.getElementById('next').addEventListener('click', ()=>{ const f=curFiles(); if(f.length){ picIdx=(picIdx+1)%f.length; loadPage(); ping(); } });
 document.getElementById('reset').addEventListener('click', ()=>{ clearPaint(); ping(); });
 
 // 그림 고르기(썸네일)
@@ -174,8 +173,8 @@ const gallery = document.getElementById('gallery');
 gallery.querySelector('.gclose').addEventListener('click', ()=> gallery.classList.remove('open'));
 gallery.addEventListener('click', (e)=>{ if(e.target===gallery || e.target.classList.contains('ggrid') || e.target.classList.contains('ghead')) gallery.classList.remove('open'); });
 document.getElementById('gallery-btn').addEventListener('click', ()=>{
-  const files=THEMES[themeIdx].files; const grid=gallery.querySelector('.ggrid'); grid.innerHTML='';
-  if(!files.length){ if(themeIdx===CHAR) filepick.click(); return; }
+  const files=curFiles(); const grid=gallery.querySelector('.ggrid'); grid.innerHTML='';
+  if(!files.length){ filepick.click(); return; }
   files.forEach((src,i)=>{ const im=document.createElement('img'); im.className='thumb'; im.loading='lazy'; im.src=src; im.addEventListener('click',()=>{ picIdx=i; gallery.classList.remove('open'); loadPage(); ping(); }); grid.appendChild(im); });
   gallery.classList.add('open'); ping();
 });
@@ -184,7 +183,7 @@ document.getElementById('gallery-btn').addEventListener('click', ()=>{
 const filepick = document.getElementById('filepick');
 filepick.addEventListener('change', (e)=>{ addFiles(e.target.files); filepick.value=''; });
 document.getElementById('charadd').addEventListener('click', ()=> filepick.click());
-document.getElementById('charclear').addEventListener('click', clearChars);
+document.getElementById('charclear').addEventListener('click', clearUp);
 
 window.addEventListener('resize', fitBox);
 
