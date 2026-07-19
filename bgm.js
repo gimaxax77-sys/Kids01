@@ -31,7 +31,7 @@
     var m = (bg||'').match(/\d+/g);
     if(!m || (m.length>=4 && +m[3]===0)) m = (getComputedStyle(document.documentElement).backgroundColor||'').match(/\d+/g);
     var lum = m ? (0.299*+m[0] + 0.587*+m[1] + 0.114*+m[2]) : 255;
-    return lum < 110 ? 'rgba(255,255,255,.55)' : 'rgba(70,58,36,.42)';
+    return lum < 110 ? 'rgba(255,255,255,.78)' : 'rgba(58,46,26,.62)';
   }
   var titleEl = document.createElement('div');
   titleEl.textContent = (document.title || '').trim();

@@ -1,5 +1,5 @@
 // 서비스워커 - 오프라인 캐시(앱 셸 프리캐시 + 런타임 캐시). 개인용 PWA
-const CACHE = 'kids01-v7';
+const CACHE = 'kids01-v8';
 const CORE = [
   './', 'index.html', 'manifest.json', 'icons/icon.svg',
   '놀이방.html', '놀이방.js', 'bgm.js', 'level.js',
@@ -20,7 +20,8 @@ const CORE = [
 self.addEventListener('install', (e)=>{
   e.waitUntil(
     caches.open(CACHE)
-      .then(c => Promise.allSettled(CORE.map(u => c.add(u)))) // 개별 실패 허용
+      // cache:'reload'로 HTTP 캐시 우회 → 항상 최신본을 프리캐시(옛 화면 고착 방지)
+      .then(c => Promise.allSettled(CORE.map(u => c.add(new Request(u, {cache:'reload'})))))
       .then(() => self.skipWaiting())
   );
 });
@@ -30,13 +31,24 @@ self.addEventListener('activate', (e)=>{
       .then(() => self.clients.claim())
   );
 });
-// 캐시 우선 + 런타임 캐시(이미지/선그림 등은 볼 때 채워짐)
+// HTML/JS/JSON: 네트워크 우선(항상 최신, 실패 시 캐시). 이미지/오디오 등: 캐시 우선(런타임 캐시)
 self.addEventListener('fetch', (e)=>{
   const req = e.request;
   if (req.method !== 'GET') return;
+  const url = new URL(req.url);
+  const fresh = req.mode === 'navigate' || /\.(html|js|json)$/.test(url.pathname);
+  if (url.origin === location.origin && fresh) {
+    e.respondWith(
+      fetch(req).then(res => {
+        if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then(c => c.put(req, cp)); }
+        return res;
+      }).catch(() => caches.match(req))
+    );
+    return;
+  }
   e.respondWith(
     caches.match(req).then(cached => cached || fetch(req).then(res => {
-      if (res && res.ok && new URL(req.url).origin === location.origin) {
+      if (res && res.ok && url.origin === location.origin) {
         const cp = res.clone(); caches.open(CACHE).then(c => c.put(req, cp));
       }
       return res;
