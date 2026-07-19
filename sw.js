@@ -1,5 +1,5 @@
 // 서비스워커 - 오프라인 캐시(앱 셸 프리캐시 + 런타임 캐시). 개인용 PWA
-const CACHE = 'kids01-v10';
+const CACHE = 'kids01-v11';
 const CORE = [
   './', 'index.html', 'manifest.json', 'icons/icon.svg',
   '놀이방.html', '놀이방.js', 'bgm.js', 'level.js',
@@ -44,7 +44,7 @@ self.addEventListener('fetch', (e)=>{
       fetch(new Request(url.href, {cache:'reload'})).then(res => {
         if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then(c => c.put(req, cp)); }
         return res;
-      }).catch(() => caches.match(req))
+      }).catch(() => caches.match(req).then(m => m || caches.match(req, {ignoreSearch:true}))) // ?mode=pro 등 쿼리도 오프라인 대응
     );
     return;
   }

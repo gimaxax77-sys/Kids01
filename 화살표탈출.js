@@ -6,12 +6,19 @@
     L:{dr:0,dc:-1, ch:'←', color:'#3fae54'},
     R:{dr:0,dc: 1, ch:'→', color:'#ef7d1a'},
   };
+  const PRO = new URLSearchParams(location.search).get('mode') === 'pro'; // 일반(도전) 모드
+  if (PRO) document.title = '화살표 탈출 · 도전';
   const grid = document.getElementById('grid');
   const mid = document.getElementById('mid');
+  const livesEl = document.getElementById('lives');
+  const MAX_LIVES = 5;
   let N = 3;          // 격자 크기(레벨)
   let cells = [];     // N*N: 방향 문자 또는 null
   let remaining = 0;
   let busy = false;
+  let lives = MAX_LIVES;
+
+  function renderLives(){ if(PRO && livesEl) livesEl.textContent = '❤️'.repeat(lives) + '🖤'.repeat(MAX_LIVES - lives); }
 
   const idx = (r,c)=> r*N + c;
   function shuffle(a){ for(let i=a.length-1;i>0;i--){ const j=(Math.random()*(i+1))|0; [a[i],a[j]]=[a[j],a[i]]; } return a; }
@@ -80,21 +87,30 @@
       setTimeout(()=>{ if(parent) parent.innerHTML=''; if(remaining<=0) win(); }, 280);
     } else {
       btn.classList.remove('blocked'); void btn.offsetWidth; btn.classList.add('blocked'); blip();
+      if(PRO){ lives--; renderLives(); if(lives<=0) gameOver(); } // 도전: 잘못 탭하면 목숨 감소
     }
   }
 
   function win(){
     busy = true; chord();
-    setTimeout(()=>{ busy=false; generate(); fit(); render(); }, 1300);
+    setTimeout(()=>{ busy=false; newPuzzle(); }, 1300);
   }
 
-  function newPuzzle(){ generate(); fit(); render(); }
+  function gameOver(){ // 도전 모드: 목숨 소진 → 잠시 후 재시작
+    busy = true; sad();
+    setTimeout(()=>{ busy=false; newPuzzle(); }, 1300);
+  }
+
+  function newPuzzle(){ lives = MAX_LIVES; renderLives(); generate(); fit(); render(); }
 
   document.getElementById('new').addEventListener('click', ()=>{ if(!busy){ newPuzzle(); ping(); } });
   window.addEventListener('resize', ()=>{ fit(); render(); });
 
-  // 레벨 1~10 → 격자 3×3 ~ 7×7
-  LevelStepper({ key:'lv_arrow', max:10, onChange:(lv)=>{ N = Math.min(3 + ((lv-1)>>1), 7); newPuzzle(); } });
+  // 레벨 1~10 → 유아: 3×3~7×7 / 도전: 5×5~12×12
+  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max:10, onChange:(lv)=>{
+    N = PRO ? Math.min(4 + lv, 12) : Math.min(3 + ((lv-1)>>1), 7);
+    newPuzzle();
+  } });
 
   // --- 소리 ---
   let ac;
@@ -103,5 +119,6 @@
   function good(){ beep(660,0.1,'triangle'); setTimeout(()=>beep(990,0.14,'triangle'),70); }
   function blip(){ beep(180,0.14,'sine',0.06); }
   function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.32,'triangle'),i*100)); }
+  function sad(){ [440,392,330].forEach((f,i)=>setTimeout(()=>beep(f,0.28,'sine',0.09),i*160)); }
   function ping(){ beep(600,0.1,'triangle',0.08); }
 })();

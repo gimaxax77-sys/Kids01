@@ -1,8 +1,8 @@
 // 놀이방 홈 - 연령대별 정렬 + 즐겨찾기(부모설정) + 실음원 BGM + PWA. 외부 스크립트
 if('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 
-// 타일 순서: 그림판,분류,퍼즐,색칠,소리,붓기,숫자,그림자,선그리기,짝맞추기,코딩,한글,셈,패턴,미로,시계,알파벳,틀린그림,지렁이,화살표탈출
-const AGES = [1,2,3,2,1,4,3,3,3,4,5,5,5,4,4,5,5,4,4,5];
+// 타일 순서: 그림판,분류,퍼즐,색칠,소리,붓기,숫자,그림자,선그리기,짝맞추기,코딩,한글,셈,패턴,미로,시계,알파벳,틀린그림,지렁이,화살표탈출,화살표탈출도전
+const AGES = [1,2,3,2,1,4,3,3,3,4,5,5,5,4,4,5,5,4,4,5,5];
 const room = document.getElementById('room');
 const toys = [...document.querySelectorAll('.toy')];
 toys.forEach((t,i)=>{
