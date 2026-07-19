@@ -24,6 +24,8 @@ canvas.width = canvas.height = RES;
 function fit(){ const mid=document.getElementById('mid'); const s=Math.min(mid.clientWidth, mid.clientHeight)*0.95; canvas.style.width=canvas.style.height=s+'px'; }
 
 function loadShape(){
+  const mid=document.getElementById('mid');
+  if(!mid.clientWidth || !mid.clientHeight){ requestAnimationFrame(loadShape); return; } // 레이아웃 전이면 재시도
   fit(); done=false; color = COLORS[shapeIdx % COLORS.length];
   const sh = SHAPES[shapeIdx % SHAPES.length];
   guidePts = []; for(let i=0;i<=90;i++){ const p=sh.pts(i/90); guidePts.push({x:PAD+p.x*(RES-2*PAD), y:PAD+p.y*(RES-2*PAD)}); }
