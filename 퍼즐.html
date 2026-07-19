@@ -13,7 +13,7 @@
   /* 상단 바: 홈 + 테마 + 난이도를 한 줄에, 좁으면 자동 줄바꿈 */
   #topbar {
     display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:2.2vw;
-    padding:calc(1vh + env(safe-area-inset-top)) 2vw 0.6vh;
+    padding:calc(5vh + env(safe-area-inset-top)) 2vw 0.6vh; /* 상단 중앙 제목과 겹치지 않게 여백 확보 */
   }
   #themes { display:flex; flex-wrap:wrap; justify-content:center; align-items:center; gap:2.2vw; }
   .theme {
