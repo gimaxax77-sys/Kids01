@@ -1,0 +1,70 @@
+<!-- 유아 학습형 코딩 놀이 - 화살표를 순서대로 놓아 로봇을 별까지(5세+) -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>코딩 놀이</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#eef3fb; font-family:sans-serif; }
+  #stage { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center;
+    padding:calc(8vh + env(safe-area-inset-top)) 4vw calc(2vh + env(safe-area-inset-bottom)); gap:1.5vh; }
+  #grid { position:relative; width:min(80vw, 46vh); aspect-ratio:1; display:grid; grid-template-columns:repeat(5,1fr); grid-template-rows:repeat(5,1fr);
+    background:#fff; border-radius:12px; box-shadow:0 3px 10px rgba(0,0,0,.1); overflow:hidden; }
+  .cell { border:1px solid #e3e9f2; display:flex; align-items:center; justify-content:center; font-size:6vw; }
+  .cell.wall { background:#8a94a6; }
+  .cell.goal { background:#fff7d6; }
+  #bot { position:absolute; left:0; top:0; display:flex; align-items:center; justify-content:center; font-size:6vw;
+    transition:left .3s ease, top .3s ease; z-index:2; }
+  #bot.bump { animation:bump .3s; } @keyframes bump { 50%{ transform:scale(.85);} }
+  #bot.yay { animation:yay .5s ease; } @keyframes yay { 50%{ transform:scale(1.3) rotate(10deg);} }
+
+  #queue { min-height:8vw; display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:1.5vw; max-width:90vw; }
+  .qchip { font-size:6vw; }
+  #pad { display:grid; grid-template-columns:repeat(3, 1fr); gap:1.5vw; }
+  #pad button { border:none; border-radius:14px; cursor:pointer; width:min(1.7cm,13vw); height:min(1.7cm,13vw); font-size:7vw; background:#fff; box-shadow:0 3px 0 rgba(0,0,0,.12); }
+  #pad button:active { transform:translateY(2px); }
+  #up{ grid-column:2; } #left{ grid-column:1; grid-row:2; } #run{ grid-column:2; grid-row:2; background:#3fae54 !important; } #right{ grid-column:3; grid-row:2; }
+  #down{ grid-column:2; grid-row:3; }
+  #clear{ grid-column:1; grid-row:3; background:#f0d6d6 !important; }
+
+  #home { position:fixed; top:calc(2vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:10;
+    width:1.5cm; height:1.5cm; max-width:11vw; max-height:6.5vh; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:#fff; text-decoration:none; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite; }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
+  #top { position:fixed; top:calc(2vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:10; display:flex; gap:2vw; align-items:center; }
+  #diff { display:flex; gap:1.5vw; }
+  #diff button { border:none; background:#d6e0f0; color:#3a4a66; font-weight:bold; border-radius:10px; cursor:pointer;
+    width:1cm; height:1cm; max-width:8vw; max-height:5vh; font-size:4vw; box-shadow:0 2px 4px rgba(0,0,0,.12); }
+  #diff button.on { background:#5a7bc0; color:#fff; transform:scale(1.1); }
+  #new { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.4cm; height:1.4cm; max-width:11vw; max-height:6vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #new:active { transform:scale(.9); }
+</style>
+</head>
+<body>
+<div id="stage">
+  <div id="grid"></div>
+  <div id="queue"></div>
+  <div id="pad">
+    <button id="up" aria-label="위">⬆️</button>
+    <button id="left" aria-label="왼쪽">⬅️</button>
+    <button id="run" aria-label="실행">▶️</button>
+    <button id="right" aria-label="오른쪽">➡️</button>
+    <button id="down" aria-label="아래">⬇️</button>
+    <button id="clear" aria-label="지우기">🗑️</button>
+  </div>
+</div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+<div id="top">
+  <div id="diff">
+    <button data-n="0" aria-label="쉬움">1</button>
+    <button data-n="2" aria-label="보통">2</button>
+    <button data-n="4" aria-label="어려움">3</button>
+  </div>
+  <button id="new" aria-label="새 판">🔄</button>
+</div>
+<script src="코딩놀이.js"></script>
+</body>
+</html>

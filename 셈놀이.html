@@ -1,0 +1,60 @@
+<!-- 유아 학습형 덧셈·뺄셈 - 물건을 보고 답 고르기(5세+) -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>셈 놀이</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#eaf7ef; font-family:sans-serif; }
+  #stage { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6vh;
+    padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(4vh + env(safe-area-inset-bottom)); }
+  #prob { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:2.5vw; }
+  .grp { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:1vw; max-width:36vw;
+    background:#fff; border-radius:14px; padding:2vw; box-shadow:0 2px 5px rgba(0,0,0,.1); }
+  .ob { font-size:7vw; line-height:1; }
+  .ob.gone { opacity:.25; text-decoration:line-through; }
+  .opr { font-size:9vw; font-weight:900; color:#3fae54; }
+  .qm { width:min(2.4cm,17vw); aspect-ratio:1; display:flex; align-items:center; justify-content:center; font-size:11vw; font-weight:900;
+    color:#b3a789; background:#fffdf7; border-radius:14px; box-shadow:0 2px 5px rgba(0,0,0,.12); }
+  .qm.right { color:#3fae54; background:#d9f2e0; }
+  #choices { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:3.5vw; }
+  .choice { width:min(2.6cm,19vw); aspect-ratio:1; border:none; border-radius:16px; cursor:pointer; font-size:11vw; font-weight:900; color:#2f6b48;
+    background:#fff; box-shadow:0 4px 0 rgba(0,0,0,.15); }
+  .choice:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.15); }
+  .choice.right { background:#d9f2e0; }
+  .choice.shake { animation:shake .35s; }
+  @keyframes shake { 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+  #home { position:fixed; top:calc(2vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:10;
+    width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite; }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
+  #op { position:fixed; top:calc(2vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:10;
+    border:none; border-radius:50%; cursor:pointer; width:1.7cm; height:1.7cm; max-width:13vw; max-height:8vh; background:#fff; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #op:active { transform:scale(.9); }
+  #bottom { position:fixed; left:50%; bottom:calc(1.6vh + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:10; display:flex; align-items:center; gap:3vw; }
+  #diff { display:flex; gap:2vw; }
+  #diff button { border:none; background:#cfe9d8; color:#2f6b48; font-weight:bold; border-radius:12px; cursor:pointer;
+    width:1.3cm; height:1.2cm; max-width:12vw; max-height:5.5vh; font-size:4.6vw; box-shadow:0 2px 4px rgba(0,0,0,.12); }
+  #diff button.on { background:#3fae54; color:#fff; transform:scale(1.1); }
+  #new { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.4cm; height:1.4cm; max-width:11vw; max-height:6vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #new:active { transform:scale(.9); }
+</style>
+</head>
+<body>
+<div id="stage"><div id="prob"></div><div id="choices"></div></div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+<button id="op" aria-label="더하기빼기">➕</button>
+<div id="bottom">
+  <div id="diff">
+    <button data-n="5" aria-label="5까지">~5</button>
+    <button data-n="10" aria-label="10까지">~10</button>
+  </div>
+  <button id="new" aria-label="새 문제">🔄</button>
+</div>
+<script src="셈놀이.js"></script>
+</body>
+</html>
