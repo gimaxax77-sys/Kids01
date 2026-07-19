@@ -7,13 +7,14 @@
 <title>놀이방</title>
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
-  html, body { height:100%; overflow:hidden; background:#f3ecdb; }
+  html, body { min-height:100%; background:#f3ecdb; }
+  body { overflow-y:auto; -webkit-overflow-scrolling:touch; }
   #room {
-    position:fixed; inset:0; display:flex; flex-wrap:wrap;
-    align-items:center; justify-content:center; gap:6vmin; padding:6vmin;
+    min-height:100vh; display:flex; flex-wrap:wrap;
+    align-items:center; align-content:center; justify-content:center; gap:5vmin; padding:6vmin calc(6vmin + env(safe-area-inset-right)) calc(6vmin + env(safe-area-inset-bottom)) calc(6vmin + env(safe-area-inset-left));
   }
   .toy {
-    display:block; width:34vmin; height:34vmin; max-width:340px; max-height:340px;
+    display:block; width:30vmin; height:30vmin; max-width:300px; max-height:300px;
     border:none; border-radius:28px; cursor:pointer; background:#fffdf7;
     box-shadow:0 8px 20px rgba(0,0,0,.14);
     animation:bob 3.2s ease-in-out infinite;
