@@ -51,7 +51,10 @@
   function fit(){
     const w = mid.clientWidth, h = mid.clientHeight;
     if(!w || !h){ requestAnimationFrame(fit); return; }
-    const s = Math.min(w, h);
+    const cs = getComputedStyle(mid); // 안쪽 여백(padding) 제외한 실제 영역 기준 → 화면 밖으로 안 넘침
+    const availW = w - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+    const availH = h - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+    const s = Math.floor(Math.min(availW, availH));
     grid.style.width = grid.style.height = s + 'px';
   }
 
