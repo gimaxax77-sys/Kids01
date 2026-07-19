@@ -24,8 +24,8 @@
   function frontClear(hr,hc,d){ const v=DV[d]; let r=hr+v.dr, c=hc+v.dc; while(inb(r,c)){ if(cells[idx(r,c)]>=0) return false; r+=v.dr; c+=v.dc; } return true; }
 
   // 자기 회피 경로(꺾임 허용) 하나 만들기
-  function randPath(maxLen){
-    const sr=(Math.random()*N)|0, sc=(Math.random()*N)|0;
+  function randPath(maxLen, sr, sc){
+    if(sr===undefined){ sr=(Math.random()*N)|0; sc=(Math.random()*N)|0; }
     if(cells[idx(sr,sc)]>=0) return null;
     let d = ['U','D','L','R'][(Math.random()*4)|0];
     const path=[[sr,sc]]; const used=new Set([idx(sr,sc)]);
@@ -56,23 +56,35 @@
     return { id, path, d, track:{ pts, cum, total:cum[cum.length-1], bodyLen }, off:0, maxOff:bodyLen+hb+1, sliding:false, blockUntil:0, removed:false };
   }
 
+  function tryPlace(path, d){ // 경로를 놓아보고, 머리 앞이 안 열리면 롤백. 성공 시 true
+    const id = arrows.length;
+    path.forEach(([r,c])=> cells[idx(r,c)]=id);
+    const head = path[path.length-1];
+    if(!frontClear(head[0],head[1],d)){ path.forEach(([r,c])=> cells[idx(r,c)]=-1); return false; }
+    arrows.push(makeArrow(id, path, d)); return true;
+  }
   function generate(){
     const maxLen = Math.min(PRO ? (5 + Math.floor(curLv/3)) : 5, N+2); // 도전은 레벨 오를수록 화살표가 길어짐
+    let best=null, bestOcc=-1;
     for(let att=0; att<8; att++){
       cells = new Array(N*N).fill(-1); arrows = [];
-      let tries = N*N*30;
-      while(tries-- > 0){
-        const pr = randPath(maxLen); if(!pr) continue;
-        const id = arrows.length;
-        pr.path.forEach(([r,c])=> cells[idx(r,c)]=id);
-        const head = pr.path[pr.path.length-1];
-        if(!frontClear(head[0],head[1],pr.d)){ pr.path.forEach(([r,c])=> cells[idx(r,c)]=-1); continue; } // 못 빠지면 롤백
-        arrows.push(makeArrow(id, pr.path, pr.d));
+      // 안쪽(가장자리에서 먼 칸)부터 채움 → 바깥쪽 통로가 비어 있어 촘촘히 참
+      const order = shuffle([...Array(N*N).keys()]).sort((a,b)=>{
+        const bd=i=>{ const r=(i/N)|0,c=i%N; return Math.min(r,c,N-1-r,N-1-c); };
+        return bd(b)-bd(a);
+      });
+      let progress=true, guard=0;
+      while(progress && guard++ < N*N*3){ // 빈 칸이 채워질 때까지: 각 빈칸에서 화살표를 키워 메움
+        progress=false;
+        for(const i of order){ if(cells[i]>=0) continue; const r=(i/N)|0, c=i%N;
+          for(let t=0;t<12;t++){ const pr = randPath(maxLen, r, c); if(pr && tryPlace(pr.path, pr.d)){ progress=true; break; } }
+        }
       }
       const occ = cells.filter(x=>x>=0).length;
-      if(occ >= N*N*0.5 && arrows.length >= Math.max(3, N-2)){ remaining=arrows.length; return; }
+      if(occ > bestOcc){ bestOcc=occ; best={ cells:cells.slice(), arrows:arrows.slice() }; }
+      if(occ === N*N) break; // 완전히 꽉 참
     }
-    remaining = arrows.length;
+    cells = best.cells; arrows = best.arrows; remaining = arrows.length;
   }
 
   function fit(){
