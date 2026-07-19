@@ -41,7 +41,7 @@ function attachDrag(o){
   });
 }
 
-function win(){ [...shadows.querySelectorAll('.shadow')].forEach((el,i)=> setTimeout(()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }, i*90)); chord(); setTimeout(newRound, 1500); }
+function win(){ [...shadows.querySelectorAll('.shadow')].forEach((el,i)=> setTimeout(()=>{ el.classList.remove('pop'); void el.offsetWidth; el.classList.add('pop'); }, i*90)); chord(); n = Math.min(n+1, 8); setTimeout(newRound, 1500); } // 완성할 때마다 그림 1개씩 증가(최대 8)
 
 document.getElementById('new').addEventListener('click', ()=>{ newRound(); ping(); });
 document.querySelectorAll('#diff button').forEach(btn=>{
