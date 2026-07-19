@@ -25,7 +25,21 @@
     btn.textContent = muted ? '🔇' : '🎵';
     if(muted) audio.pause(); else play();
   });
-  function mount(){ if(document.body) document.body.appendChild(btn); }
+  // 놀이 이름을 상단 중앙에 은은하게 표시(튀지 않게). 배경 밝기에 따라 글자색 자동 선택
+  function titleColor(){
+    var bg = getComputedStyle(document.body).backgroundColor;
+    var m = (bg||'').match(/\d+/g);
+    if(!m || (m.length>=4 && +m[3]===0)) m = (getComputedStyle(document.documentElement).backgroundColor||'').match(/\d+/g);
+    var lum = m ? (0.299*+m[0] + 0.587*+m[1] + 0.114*+m[2]) : 255;
+    return lum < 110 ? 'rgba(255,255,255,.55)' : 'rgba(70,58,36,.42)';
+  }
+  var titleEl = document.createElement('div');
+  titleEl.textContent = (document.title || '').trim();
+  titleEl.style.cssText = 'position:fixed;top:calc(0.8vh + env(safe-area-inset-top));left:50%;transform:translateX(-50%);z-index:4;'
+    + 'font-family:sans-serif;font-weight:600;font-size:min(3.8vw,17px);letter-spacing:.3px;'
+    + 'pointer-events:none;white-space:nowrap;max-width:56vw;overflow:hidden;text-overflow:ellipsis;';
+
+  function mount(){ if(document.body){ document.body.appendChild(btn); if(titleEl.textContent){ titleEl.style.color = titleColor(); document.body.appendChild(titleEl); } } }
   if(document.body) mount(); else document.addEventListener('DOMContentLoaded', mount);
 
   // 자동재생 정책: 첫 터치/클릭 때 시작

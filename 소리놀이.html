@@ -9,7 +9,7 @@
   * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
   html, body { height:100%; overflow:hidden; touch-action:none; background:#2a2540; font-family:sans-serif; }
   #stage { position:fixed; inset:0; display:flex; flex-direction:column; }
-  #pads { flex:1; display:grid; gap:2.5vw; padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(3vh + env(safe-area-inset-bottom)); }
+  #pads { flex:1; display:grid; gap:2.5vw; padding:calc(12vh + env(safe-area-inset-top)) 4vw calc(3vh + env(safe-area-inset-bottom)); }
   .pad {
     border:none; border-radius:20px; cursor:pointer; position:relative; overflow:hidden;
     box-shadow:0 6px 0 rgba(0,0,0,.25); transition:transform .06s ease, box-shadow .06s ease;
@@ -33,7 +33,7 @@
     background:#fff; font-size:min(6vw,39px); line-height:1; box-shadow:0 2px 6px rgba(0,0,0,.3);
   }
   #inst:active { transform:scale(.9); }
-  #instname { position:fixed; top:calc(2.4vh + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10; color:#fff; font-size:min(5vw,32px); font-weight:bold; opacity:.9; }
+  #instname { position:fixed; top:calc(5.5vh + env(safe-area-inset-top)); left:50%; transform:translateX(-50%); z-index:10; color:#fff; font-size:min(5vw,32px); font-weight:bold; opacity:.9; }
 </style>
 </head>
 <body>
