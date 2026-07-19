@@ -1,8 +1,8 @@
 // 서비스워커 - 오프라인 캐시(앱 셸 프리캐시 + 런타임 캐시). 개인용 PWA
-const CACHE = 'kids01-v5';
+const CACHE = 'kids01-v6';
 const CORE = [
   './', 'index.html', 'manifest.json', 'icons/icon.svg',
-  '놀이방.html', '놀이방.js', 'bgm.js',
+  '놀이방.html', '놀이방.js', 'bgm.js', 'level.js',
   'music/bgm.mp3', 'music/bgm2.mp3', 'music/bgm3.mp3',
   'packs/puzzle-manifest.js', 'packs/color-manifest.js',
   '그림판.html', '분류놀이.html',

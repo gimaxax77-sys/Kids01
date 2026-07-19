@@ -1,5 +1,5 @@
 // 물·모래 붓기 퍼즐 로직 - 튜브에 부어 같은 색끼리 모으기(워터소트). 외부 스크립트
-const COLORS = ['#e23b3b','#f5c518','#3b7de2','#3fae54','#ef7d1a','#9b4fd0'];
+const COLORS = ['#e23b3b','#f5c518','#3b7de2','#3fae54','#ef7d1a','#9b4fd0','#00bcd4','#e91e63','#8d6e63','#546e7a'];
 const CAP = 4;
 let nColors = 3;         // 색 수(난이도)
 let mode = 'water';      // 'water' | 'sand'
@@ -64,10 +64,8 @@ function win(){
 // 컨트롤
 document.getElementById('mode').addEventListener('click', (e)=>{ mode = mode==='water'?'sand':'water'; e.currentTarget.textContent = mode==='water'?'💧':'🏖️'; render(); ping(); });
 document.getElementById('new').addEventListener('click', ()=>{ newPuzzle(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===nColors) btn.classList.add('on');
-  btn.addEventListener('click', ()=>{ nColors=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newPuzzle(); ping(); });
-});
+// 레벨 1~10 → 색 수 2~10 (빈 튜브 2개 여유)
+LevelStepper({ key:'lv_pour', max:10, onChange:(lv)=>{ nColors = Math.min(1+lv, COLORS.length); newPuzzle(); } });
 
 // --- 소리 ---
 let ac;
@@ -80,5 +78,4 @@ function pourSound(){ // 물 흐르는 듯 하강음
 function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.35,'triangle'),i*110)); }
 function ping(){ beep(620,0.1,'triangle',0.08); }
 
-newPuzzle();
 window.addEventListener('resize', render);

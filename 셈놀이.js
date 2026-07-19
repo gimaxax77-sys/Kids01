@@ -33,10 +33,8 @@ function pick(btn,v){
 
 document.getElementById('op').addEventListener('click',(e)=>{ op = op==='+'?'-':'+'; e.currentTarget.textContent = op==='+'?'➕':'➖'; newRound(); ping(); });
 document.getElementById('new').addEventListener('click',()=>{ newRound(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===maxN) btn.classList.add('on');
-  btn.addEventListener('click',()=>{ maxN=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newRound(); ping(); });
-});
+// 레벨 1~10 → 최대 수 4~13
+LevelStepper({ key:'lv_math', max:10, onChange:(lv)=>{ maxN = 3+lv; newRound(); } });
 
 // --- 소리 ---
 let ac;
@@ -45,5 +43,3 @@ function beep(f,d,type='sine',v=0.1){ const a=audio(),o=a.createOscillator(),g=a
 function good(){ beep(660,0.12); setTimeout(()=>beep(990,0.18),90); }
 function blip(){ beep(200,0.14,'sine',0.07); }
 function ping(){ beep(600,0.1,'triangle',0.08); }
-
-newRound();

@@ -37,10 +37,8 @@ function pick(b, c){
 }
 
 document.getElementById('new').addEventListener('click', ()=>{ newRound(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===unitLen) btn.classList.add('on');
-  btn.addEventListener('click', ()=>{ unitLen=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newRound(); ping(); });
-});
+// 레벨 1~10 → 규칙 길이 2~8
+LevelStepper({ key:'lv_pattern', max:10, onChange:(lv)=>{ unitLen = Math.min(1+lv, 8); newRound(); } });
 
 // --- 소리 ---
 let ac;
@@ -49,5 +47,3 @@ function beep(f,d,type='sine',v=0.1){ const a=audio(),o=a.createOscillator(),g=a
 function good(){ beep(660,0.12); setTimeout(()=>beep(990,0.18),90); }
 function blip(){ beep(200,0.14,'sine',0.07); }
 function ping(){ beep(600,0.1,'triangle',0.08); }
-
-newRound();

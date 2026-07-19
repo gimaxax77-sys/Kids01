@@ -85,10 +85,8 @@ canvas.addEventListener('pointerup',()=>drawing=false);
 canvas.addEventListener('pointercancel',()=>drawing=false);
 
 document.getElementById('new').addEventListener('click',()=>{ newMaze(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===size) btn.classList.add('on');
-  btn.addEventListener('click',()=>{ size=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newMaze(); ping(); });
-});
+// 레벨 1~10 → 미로 칸 수 5~14
+LevelStepper({ key:'lv_maze', max:10, onChange:(lv)=>{ size = 4+lv; newMaze(); } });
 window.addEventListener('resize', ()=>{ fit(); draw(); });
 
 // --- 소리 ---
@@ -100,5 +98,4 @@ function step(){ const n=Date.now(); if(n-lastStep<50) return; lastStep=n; beep(
 function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.32,'triangle'),i*100)); }
 function ping(){ beep(600,0.1,'triangle',0.07); }
 
-newMaze();
 window.addEventListener('load', newMaze);

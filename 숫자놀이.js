@@ -31,10 +31,8 @@ function count(b){
 }
 
 document.getElementById('new').addEventListener('click', ()=>{ newRound(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===maxN) btn.classList.add('on');
-  btn.addEventListener('click', ()=>{ maxN=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); bignum.classList.remove('big'); newRound(); ping(); });
-});
+// 레벨 1~10 → 최대 개수 2~20
+LevelStepper({ key:'lv_count', max:10, onChange:(lv)=>{ maxN = lv*2; bignum.classList.remove('big'); newRound(); } });
 
 // --- 소리 ---
 let ac;
@@ -43,5 +41,3 @@ function beep(f,d,type='sine',v=0.1){ const a=audio(),o=a.createOscillator(),g=a
 function countSound(n){ beep(300 + n*45, 0.14, 'triangle', 0.1); } // 셀수록 높은음
 function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.35,'triangle'),i*110)); }
 function ping(){ beep(600,0.1,'triangle',0.08); }
-
-newRound();

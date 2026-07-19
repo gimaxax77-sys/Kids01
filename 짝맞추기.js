@@ -16,8 +16,9 @@ function newGame(){
 
 function render(){
   board.innerHTML='';
-  const cols = pairs<=3 ? 3 : (pairs<=6 ? 4 : (pairs<=8 ? 4 : 5));
+  const cols = pairs<=3 ? 3 : (pairs<=8 ? 4 : (pairs<=12 ? 5 : 6));
   board.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+  fitCards(cols, cards.length);
   cards.forEach((c,i)=>{
     const el=document.createElement('button'); el.className='card';
     const open = c.matched || flipped.includes(i);
@@ -26,6 +27,17 @@ function render(){
     el.addEventListener('pointerdown', ()=> tap(i));
     board.appendChild(el);
   });
+}
+
+function fitCards(cols, count){ // 카드 수에 맞춰 카드 크기 자동 조정(넘침 방지)
+  if(!board.clientWidth||!board.clientHeight) return; // 레이아웃 전이면 CSS 기본값 사용
+  const cs=getComputedStyle(board);
+  const gap=parseFloat(cs.gap)||0;
+  const availW=board.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight) - gap*(cols-1);
+  const rows=Math.ceil(count/cols);
+  const availH=board.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) - gap*(rows-1);
+  const sz=Math.max(28, Math.floor(Math.min(availW/cols, availH/rows)));
+  board.style.setProperty('--cw', sz+'px');
 }
 
 function tap(i){
@@ -51,10 +63,8 @@ function win(){
 }
 
 document.getElementById('new').addEventListener('click', ()=>{ newGame(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===pairs) btn.classList.add('on');
-  btn.addEventListener('click', ()=>{ pairs=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newGame(); ping(); });
-});
+// 레벨 1~10 → 짝 수 3~12
+LevelStepper({ key:'lv_match', max:10, onChange:(lv)=>{ pairs = Math.min(2+lv, POOL.length); newGame(); } });
 
 // --- 소리 ---
 let ac;
@@ -64,5 +74,3 @@ function flip(){ beep(500,0.08,'triangle',0.07); }
 function good(){ beep(660,0.12); setTimeout(()=>beep(880,0.16),90); }
 function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.35,'triangle'),i*110)); }
 function ping(){ beep(600,0.1,'triangle',0.08); }
-
-newGame();

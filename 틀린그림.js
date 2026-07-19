@@ -39,10 +39,8 @@ function updateStatus(){ status.textContent = '🔍 ' + found.size + ' / ' + dif
 function winRound(){ win=true; [...document.querySelectorAll('.cell.found')].forEach((el,k)=> setTimeout(()=>{ el.classList.remove('cheer'); void el.offsetWidth; el.classList.add('cheer'); }, k*80)); chord(); setTimeout(newRound, 1600); }
 
 document.getElementById('new').addEventListener('click',()=>{ newRound(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===diffN) btn.classList.add('on');
-  btn.addEventListener('click',()=>{ diffN=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newRound(); ping(); });
-});
+// 레벨 1~10 → 다른 곳 2~11 (16칸 격자)
+LevelStepper({ key:'lv_spot', max:10, onChange:(lv)=>{ diffN = Math.min(1+lv, COLS*ROWS-1); newRound(); } });
 
 let ac;
 function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
@@ -51,5 +49,3 @@ function good(){ beep(660,0.12); setTimeout(()=>beep(990,0.18),80); }
 function blip(){ beep(200,0.14,'sine',0.07); }
 function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.32,'triangle'),i*100)); }
 function ping(){ beep(600,0.1,'triangle',0.08); }
-
-newRound();

@@ -14,11 +14,23 @@ function newLevel(){
   running=false; queue=[]; renderQueue();
   start = {r:4, c:0};
   do { goal = {r:rnd(G), c:rnd(G)}; } while(goal.r===start.r && goal.c===start.c);
-  wallSet = new Set();
-  let tries=0;
-  while(wallSet.size<walls && tries<50){ tries++; const w=key(rnd(G),rnd(G)); if(w===key(start.r,start.c)||w===key(goal.r,goal.c)) continue; wallSet.add(w); }
+  // 벽 배치 - 도착 가능한 배치가 될 때까지 재시도
+  for(let attempt=0; attempt<40; attempt++){
+    wallSet = new Set();
+    let tries=0;
+    while(wallSet.size<walls && tries<200){ tries++; const w=key(rnd(G),rnd(G)); if(w===key(start.r,start.c)||w===key(goal.r,goal.c)) continue; wallSet.add(w); }
+    if(reachable()) break;
+  }
   pos = {...start};
   buildGrid();
+}
+function reachable(){ // start→goal 경로 존재 여부(BFS)
+  const seen=new Set([key(start.r,start.c)]); const st=[{...start}];
+  while(st.length){ const p=st.pop(); if(p.r===goal.r&&p.c===goal.c) return true;
+    [[1,0],[-1,0],[0,1],[0,-1]].forEach(([dr,dc])=>{ const nr=p.r+dr,nc=p.c+dc, k=key(nr,nc);
+      if(nr>=0&&nr<G&&nc>=0&&nc<G&&!wallSet.has(k)&&!seen.has(k)){ seen.add(k); st.push({r:nr,c:nc}); } });
+  }
+  return false;
 }
 
 function buildGrid(){
@@ -67,10 +79,8 @@ document.getElementById('right').addEventListener('click',()=>add('R'));
 document.getElementById('run').addEventListener('click',run);
 document.getElementById('clear').addEventListener('click',()=>{ if(running) return; queue=[]; renderQueue(); pos={...start}; placeBot(); ping(); });
 document.getElementById('new').addEventListener('click',()=>{ newLevel(); ping(); });
-document.querySelectorAll('#diff button').forEach(btn=>{
-  if(+btn.dataset.n===walls) btn.classList.add('on');
-  btn.addEventListener('click',()=>{ walls=+btn.dataset.n; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); newLevel(); ping(); });
-});
+// 레벨 1~10 → 벽 수 2~11 (도착 가능 보장)
+LevelStepper({ key:'lv_code', max:10, onChange:(lv)=>{ walls = 1+lv; newLevel(); } });
 window.addEventListener('resize', ()=>{ buildGrid(); });
 
 // --- 소리 ---

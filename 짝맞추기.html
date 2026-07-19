@@ -12,8 +12,8 @@
   #board { flex:1; display:grid; gap:2.5vw; align-content:center; justify-content:center;
     padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(9vh + env(safe-area-inset-bottom)); }
   .card {
-    width:min(2.6cm, 20vw); aspect-ratio:1; border:none; border-radius:16px; cursor:pointer;
-    background:#7a5cd0; font-size:min(11vw,72px); line-height:1; display:flex; align-items:center; justify-content:center;
+    width:var(--cw, min(2.6cm, 20vw)); aspect-ratio:1; border:none; border-radius:16px; cursor:pointer;
+    background:#7a5cd0; font-size:calc(var(--cw, 18vw) * 0.6); line-height:1; display:flex; align-items:center; justify-content:center;
     box-shadow:0 4px 0 rgba(0,0,0,.2); transition:transform .12s ease, background .12s ease;
   }
   .card.open { background:#fffdf7; }
@@ -47,6 +47,7 @@
   </div>
   <button id="new" aria-label="새 판">🔄</button>
 </div>
+<script src="level.js"></script>
 <script src="짝맞추기.js"></script>
 <script src="bgm.js"></script>
 </body>
