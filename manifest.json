@@ -1,0 +1,14 @@
+{
+  "name": "학습놀이 놀이방",
+  "short_name": "놀이방",
+  "start_url": "놀이방.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f3ecdb",
+  "theme_color": "#ffd873",
+  "lang": "ko",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

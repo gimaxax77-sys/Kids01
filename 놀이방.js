@@ -1,4 +1,5 @@
-// 놀이방 홈 - 연령대별 정렬 + 연령 배지 + 실음원 BGM(재생/정지). 외부 스크립트
+// 놀이방 홈 - 연령대별 정렬 + 연령 배지 + 실음원 BGM(재생/정지) + PWA. 외부 스크립트
+if('serviceWorker' in navigator){ window.addEventListener('load', ()=> navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 // 원본 타일 순서: 그림판,분류,퍼즐,색칠,소리,붓기,숫자,그림자,선그리기,짝맞추기,코딩,한글,셈,패턴
 const AGES = [1,2,3,2,1,4,3,3,3,4,5,5,5,4];
 
