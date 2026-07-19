@@ -1,0 +1,42 @@
+<!-- 유아 학습형 시계 보기 - 바늘을 보고 몇 시인지 고르기(5세+) -->
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>시계 보기</title>
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-user-select:none; user-select:none; -webkit-tap-highlight-color:transparent; }
+  html, body { height:100%; overflow:hidden; touch-action:none; background:#eef3fb; font-family:sans-serif; }
+  #stage { position:fixed; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:5vh;
+    padding:calc(9vh + env(safe-area-inset-top)) 4vw calc(4vh + env(safe-area-inset-bottom)); }
+  #clock { width:min(70vw, 40vh); aspect-ratio:1; }
+  #choices { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:3.5vw; }
+  .choice { border:none; border-radius:16px; cursor:pointer; font-size:6.5vw; font-weight:800; color:#3a4a66;
+    background:#fff; padding:2.5vw 5vw; box-shadow:0 4px 0 rgba(0,0,0,.15); }
+  .choice:active { transform:translateY(3px); box-shadow:0 1px 0 rgba(0,0,0,.15); }
+  .choice.right { background:#d9f2e0; }
+  .choice.shake { animation:shake .35s; }
+  @keyframes shake { 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+
+  #home { position:fixed; top:calc(2vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:10;
+    width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh; display:flex; align-items:center; justify-content:center;
+    border-radius:50%; background:#fff; text-decoration:none; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); animation:breathe 3s ease-in-out infinite; }
+  #home:active { transform:scale(.9); }
+  @keyframes breathe { 0%,100%{ transform:scale(1);} 50%{ transform:scale(1.08);} }
+  #mode { position:fixed; top:calc(2vh + env(safe-area-inset-top)); right:calc(3vw + env(safe-area-inset-right)); z-index:10;
+    border:none; border-radius:50%; cursor:pointer; width:1.7cm; height:1.7cm; max-width:13vw; max-height:8vh; background:#fff; font-size:5.5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #mode:active { transform:scale(.9); }
+  #new { position:fixed; left:50%; bottom:calc(1.6vh + env(safe-area-inset-bottom)); transform:translateX(-50%); z-index:10;
+    border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.4cm; height:1.4cm; max-width:11vw; max-height:6vh; font-size:5vw; box-shadow:0 2px 6px rgba(0,0,0,.18); }
+  #new:active { transform:scale(.9) translateX(-53%); }
+</style>
+</head>
+<body>
+<div id="stage"><div id="clock"></div><div id="choices"></div></div>
+<a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
+<button id="mode" aria-label="정각/30분">🕐</button>
+<button id="new" aria-label="새 문제">🔄</button>
+<script src="시계놀이.js"></script>
+</body>
+</html>

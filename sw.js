@@ -1,5 +1,5 @@
 // 서비스워커 - 오프라인 캐시(앱 셸 프리캐시 + 런타임 캐시). 개인용 PWA
-const CACHE = 'kids01-v1';
+const CACHE = 'kids01-v2';
 const CORE = [
   './', 'index.html', 'manifest.json', 'icons/icon.svg',
   '놀이방.html', '놀이방.js', 'music/bgm.mp3',
@@ -11,6 +11,7 @@ const CORE = [
   '선그리기.html', '선그리기.js', '짝맞추기.html', '짝맞추기.js',
   '코딩놀이.html', '코딩놀이.js', '한글놀이.html', '한글놀이.js',
   '셈놀이.html', '셈놀이.js', '패턴잇기.html', '패턴잇기.js',
+  '미로놀이.html', '미로놀이.js', '시계놀이.html', '시계놀이.js',
 ];
 
 self.addEventListener('install', (e)=>{
