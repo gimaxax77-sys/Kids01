@@ -32,6 +32,11 @@
     font-size:min(4.2vmin,22px); font-weight:700; padding:1vmin 2vmin 0;
   }
   .guide small { display:block; font-weight:500; font-size:min(3.2vmin,15px); opacity:.8; margin-top:.6vmin; }
+  .grouphdr {
+    flex:1 0 100%; text-align:center; margin:2vmin 0 0.5vmin;
+    color:#5a6b8a; font-family:sans-serif; font-weight:800; font-size:min(4.4vmin,22px);
+  }
+  .grouphdr::before, .grouphdr::after { content:'·····'; opacity:.4; margin:0 1.5vmin; letter-spacing:2px; }
   #bgm {
     position:fixed; top:calc(2vmin + env(safe-area-inset-top)); right:calc(2vmin + env(safe-area-inset-right)); z-index:20;
     width:min(9vmin,52px); height:min(9vmin,52px); border:none; border-radius:50%; cursor:pointer;
@@ -208,6 +213,7 @@
     </svg>
   </a>
 </div>
+<audio id="bgmaudio" src="music/bgm.mp3" loop preload="auto"></audio>
 <button id="bgm" aria-label="음악">🔊</button>
 <script src="놀이방.js"></script>
 </body>
