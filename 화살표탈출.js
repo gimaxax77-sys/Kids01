@@ -108,8 +108,8 @@
 
   function drawHead(cx,cy,dx,dy,col){
     if(!dx && !dy) return;
-    const hh=cell*0.30;
-    const tipx=cx+dx*cell*0.26, tipy=cy+dy*cell*0.26, bx=cx-dx*cell*0.05, by=cy-dy*cell*0.05, px=-dy, py=dx;
+    const hh=cell*0.25;
+    const tipx=cx+dx*cell*0.24, tipy=cy+dy*cell*0.24, bx=cx-dx*cell*0.04, by=cy-dy*cell*0.04, px=-dy, py=dx;
     ctx.fillStyle=col; ctx.beginPath(); ctx.moveTo(tipx,tipy); ctx.lineTo(bx+px*hh,by+py*hh); ctx.lineTo(bx-px*hh,by-py*hh); ctx.closePath(); ctx.fill();
   }
   function drawArrow(a){
@@ -117,7 +117,7 @@
     if(a.blockUntil>Date.now()){ const m=Math.sin((a.blockUntil-Date.now())/24)*0.12; const dv=DV[a.d]; shx=(-dv.dr)*m; shy=(dv.dc)*m; }
     const hi = Math.min(a.off + a.track.bodyLen, a.track.total);
     const w = windowPts(a.track, a.off, hi); if(!w) return;
-    ctx.strokeStyle=COLOR[a.d]; ctx.lineWidth=cell*0.42; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.strokeStyle=COLOR[a.d]; ctx.lineWidth=cell*0.34; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.beginPath(); w.forEach((p,i)=>{ const X=(p.x+shx)*cell, Y=(p.y+shy)*cell; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); ctx.stroke();
     const f = ptAt(a.track, hi);
     drawHead((f.x+shx)*cell, (f.y+shy)*cell, f.dx, f.dy, COLOR[a.d]);
@@ -164,10 +164,10 @@
   if(new URLSearchParams(location.search).get('debug'))
     window.__ae = { get arrows(){return arrows;}, get cells(){return cells;}, get N(){return N;}, get S(){return S;}, get cell(){return cell;}, DV, frontClear, tap };
 
-  // 유아: 레벨 1~10 (3×3~7×7) / 도전: 레벨 1~20 (5×5~16×16, 상위는 화살표 길이로 난도 상승)
-  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?20:10, onChange:(lv)=>{
+  // 유아: 레벨 1~10 (3×3~7×7) / 도전: 레벨 1~30 (5×5~18×18, 상위는 화살표 길이로 난도 상승)
+  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?30:10, onChange:(lv)=>{
     curLv = lv;
-    N = PRO ? Math.min(4 + lv, 16) : Math.min(3 + ((lv-1)>>1), 7);
+    N = PRO ? Math.min(4 + lv, 18) : Math.min(3 + ((lv-1)>>1), 7);
     newPuzzle();
   } });
 
