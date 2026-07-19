@@ -1,4 +1,4 @@
-<!-- 유아 학습형 화살표 탈출 - 화살표 방향으로 길이 열려 있으면 탭해서 빼내기(5세+) -->
+<!-- 유아 학습형 화살표 탈출 - 이어진 화살표를 방향으로 미끄러뜨려 빼내기(5세+) -->
 <!doctype html>
 <html lang="ko">
 <head>
@@ -11,17 +11,7 @@
   #stage { position:fixed; inset:0; display:flex; flex-direction:column; }
   #mid { flex:1; position:relative; display:flex; align-items:center; justify-content:center;
     padding:calc(9vh + env(safe-area-inset-top)) 3vw calc(9vh + env(safe-area-inset-bottom)); }
-  #grid { display:grid; gap:1.4%; background:#fff; border-radius:16px; padding:1.6%; box-shadow:0 2px 10px rgba(0,0,0,.1); }
-  .cell { aspect-ratio:1; display:flex; align-items:center; justify-content:center; }
-  .arrow { width:100%; height:100%; border:none; border-radius:16%; cursor:pointer; color:#fff; font-weight:900;
-    display:flex; align-items:center; justify-content:center; line-height:1; box-shadow:0 3px 0 rgba(0,0,0,.18);
-    transition:transform .28s ease, opacity .28s ease; }
-  .arrow:active { transform:scale(.92); }
-  .arrow.gone { opacity:0; }
-  .arrow.blocked { animation:shake .35s; }
-  @keyframes shake { 25%{transform:translateX(-8%);} 75%{transform:translateX(8%);} }
-  .arrow.cheer { animation:cheer .5s ease; }
-  @keyframes cheer { 50%{ transform:scale(1.15);} }
+  #board { background:#fff; border-radius:16px; box-shadow:0 2px 10px rgba(0,0,0,.1); touch-action:none; }
 
   #home { position:fixed; top:calc(2vh + env(safe-area-inset-top)); left:calc(3vw + env(safe-area-inset-left)); z-index:10;
     width:1.6cm; height:1.6cm; max-width:12vw; max-height:7vh; display:flex; align-items:center; justify-content:center;
@@ -34,13 +24,12 @@
   #diff { display:flex; gap:2vw; }
   #diff button { border:none; background:#d6e0f0; color:#3a4a66; font-weight:bold; border-radius:12px; cursor:pointer;
     width:1.2cm; height:1.2cm; max-width:9vw; max-height:5.5vh; font-size:min(4.6vw,28px); box-shadow:0 2px 4px rgba(0,0,0,.12); }
-  #diff button.on { background:#5a7bc0; color:#fff; transform:scale(1.1); }
   #new { border:none; background:#fff; border-radius:50%; cursor:pointer; width:1.4cm; height:1.4cm; max-width:11vw; max-height:6vh; font-size:min(5vw,32px); box-shadow:0 2px 6px rgba(0,0,0,.18); }
   #new:active { transform:scale(.9); }
 </style>
 </head>
 <body>
-<div id="stage"><div id="mid"><div id="grid"></div></div></div>
+<div id="stage"><div id="mid"><canvas id="board"></canvas></div></div>
 <a id="home" href="놀이방.html" aria-label="놀이방">🏠</a>
 <div id="lives"></div>
 <div id="bottom">
