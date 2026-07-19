@@ -10,6 +10,7 @@ toys.forEach((t,i)=>{
   t._href = t.getAttribute('href');
   t._label = t.getAttribute('aria-label');
   const s=document.createElement('span'); s.className='age'; s.textContent=t._age+'세+'; t.appendChild(s);
+  const nm=document.createElement('span'); nm.className='toyname'; nm.textContent=t._label; t.appendChild(nm);
 });
 
 // 즐겨찾기 상태
