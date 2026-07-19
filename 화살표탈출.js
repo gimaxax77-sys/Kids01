@@ -11,7 +11,7 @@
   const COLOR = { U:'#e23b3b', D:'#3b7de2', L:'#3fae54', R:'#ef7d1a' };
   const REV = { U:'D', D:'U', L:'R', R:'L' };
 
-  let N = 3, cell = 20, S = 0;
+  let N = 3, cell = 20, S = 0, curLv = 1;
   let cells = [];                        // N*N: 화살표 id 또는 -1
   let arrows = [];                       // {id,path,d,track,off,maxOff,sliding,blockUntil,removed}
   let remaining = 0, busy = false, lives = MAX_LIVES, anim = null, winPending = false;
@@ -57,7 +57,7 @@
   }
 
   function generate(){
-    const maxLen = Math.min(PRO?7:5, N+2);
+    const maxLen = Math.min(PRO ? (5 + Math.floor(curLv/3)) : 5, N+2); // 도전은 레벨 오를수록 화살표가 길어짐
     for(let att=0; att<8; att++){
       cells = new Array(N*N).fill(-1); arrows = [];
       let tries = N*N*30;
@@ -164,9 +164,10 @@
   if(new URLSearchParams(location.search).get('debug'))
     window.__ae = { get arrows(){return arrows;}, get cells(){return cells;}, get N(){return N;}, get S(){return S;}, get cell(){return cell;}, DV, frontClear, tap };
 
-  // 레벨 1~10 → 유아: 3×3~7×7 / 도전: 5×5~12×12
-  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max:10, onChange:(lv)=>{
-    N = PRO ? Math.min(4 + lv, 12) : Math.min(3 + ((lv-1)>>1), 7);
+  // 유아: 레벨 1~10 (3×3~7×7) / 도전: 레벨 1~20 (5×5~16×16, 상위는 화살표 길이로 난도 상승)
+  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?20:10, onChange:(lv)=>{
+    curLv = lv;
+    N = PRO ? Math.min(4 + lv, 16) : Math.min(3 + ((lv-1)>>1), 7);
     newPuzzle();
   } });
 
