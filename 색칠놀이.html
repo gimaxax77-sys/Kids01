@@ -112,6 +112,8 @@ function clearPaint(){ pctx.clearRect(0,0,RES,RES); } // 투명 = 아래 색바�
 
 // 색입혀진 그림을 연하게(색바램) 아래 레이어로. 위 투명 캔버스에 칠하면 덮임
 function loadPage(){
+  const mid=document.getElementById('mid');
+  if(!mid.clientWidth || !mid.clientHeight){ requestAnimationFrame(loadPage); return; } // 레이아웃 전이면 재시도
   const files = curFiles();
   fitBox(); clearPaint(); updateCharCtl(); removePickNote();
   if(!files.length){ lines.removeAttribute('src'); showPickNote(); return; }
