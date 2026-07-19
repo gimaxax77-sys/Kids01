@@ -14,12 +14,24 @@
     align-items:center; align-content:center; justify-content:center; gap:5vmin; padding:6vmin calc(6vmin + env(safe-area-inset-right)) calc(6vmin + env(safe-area-inset-bottom)) calc(6vmin + env(safe-area-inset-left));
   }
   .toy {
+    position:relative;
     display:block; width:30vmin; height:30vmin; max-width:300px; max-height:300px;
     border:none; border-radius:28px; cursor:pointer; background:#fffdf7;
     box-shadow:0 8px 20px rgba(0,0,0,.14);
     animation:bob 3.2s ease-in-out infinite;
     transition:transform .15s ease;
   }
+  .age {
+    position:absolute; top:-1.5vmin; right:-1.5vmin; z-index:2;
+    background:#ff8f3c; color:#fff; font-weight:800; font-family:sans-serif;
+    font-size:min(3.4vmin,30px); padding:0.6vmin 2vmin; border-radius:999px;
+    box-shadow:0 2px 6px rgba(0,0,0,.25); white-space:nowrap;
+  }
+  .guide {
+    flex:1 0 100%; text-align:center; color:#7a6a4a; font-family:sans-serif;
+    font-size:min(4.2vmin,22px); font-weight:700; padding:1vmin 2vmin 0;
+  }
+  .guide small { display:block; font-weight:500; font-size:min(3.2vmin,15px); opacity:.8; margin-top:.6vmin; }
   .toy:nth-child(2){ animation-delay:.6s; }
   .toy:nth-child(3){ animation-delay:1.2s; }
   .toy:nth-child(4){ animation-delay:1.8s; }
@@ -40,6 +52,7 @@
 </head>
 <body>
 <div id="room">
+  <div class="guide">놀이방 🎈 <small>배지의 나이는 추천 이용 연령이에요 (참고용)</small></div>
   <!-- 그림판: 색색의 낙서 -->
   <a class="toy" href="그림판.html" aria-label="그림판">
     <svg viewBox="0 0 100 100">
@@ -188,5 +201,6 @@
     </svg>
   </a>
 </div>
+<script src="놀이방.js"></script>
 </body>
 </html>
