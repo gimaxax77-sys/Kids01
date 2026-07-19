@@ -32,6 +32,13 @@
     font-size:min(4.2vmin,22px); font-weight:700; padding:1vmin 2vmin 0;
   }
   .guide small { display:block; font-weight:500; font-size:min(3.2vmin,15px); opacity:.8; margin-top:.6vmin; }
+  #bgm {
+    position:fixed; top:calc(2vmin + env(safe-area-inset-top)); right:calc(2vmin + env(safe-area-inset-right)); z-index:20;
+    width:min(9vmin,52px); height:min(9vmin,52px); border:none; border-radius:50%; cursor:pointer;
+    background:#fff; font-size:min(5vmin,26px); line-height:1; box-shadow:0 2px 6px rgba(0,0,0,.2);
+  }
+  #bgm:active { transform:scale(.9); }
+  #bgm.off { opacity:.55; }
   .toy:nth-child(2){ animation-delay:.6s; }
   .toy:nth-child(3){ animation-delay:1.2s; }
   .toy:nth-child(4){ animation-delay:1.8s; }
@@ -201,6 +208,7 @@
     </svg>
   </a>
 </div>
+<button id="bgm" aria-label="음악">🔊</button>
 <script src="놀이방.js"></script>
 </body>
 </html>
