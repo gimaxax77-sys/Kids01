@@ -1,5 +1,5 @@
 // 서비스워커 - 오프라인 캐시(앱 셸 프리캐시 + 런타임 캐시). 개인용 PWA
-const CACHE = 'kids01-v8';
+const CACHE = 'kids01-v9';
 const CORE = [
   './', 'index.html', 'manifest.json', 'icons/icon.svg',
   '놀이방.html', '놀이방.js', 'bgm.js', 'level.js',
@@ -38,8 +38,9 @@ self.addEventListener('fetch', (e)=>{
   const url = new URL(req.url);
   const fresh = req.mode === 'navigate' || /\.(html|js|json)$/.test(url.pathname);
   if (url.origin === location.origin && fresh) {
+    // HTTP 캐시까지 우회해 항상 최신본 수신(옛 파일 고착 방지), 실패 시 캐시
     e.respondWith(
-      fetch(req).then(res => {
+      fetch(new Request(url.href, {cache:'reload'})).then(res => {
         if (res && res.ok) { const cp = res.clone(); caches.open(CACHE).then(c => c.put(req, cp)); }
         return res;
       }).catch(() => caches.match(req))
