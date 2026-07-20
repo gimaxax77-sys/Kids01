@@ -9,6 +9,18 @@
   const MAX_LIVES = 5;
   const DV = { U:{dr:-1,dc:0}, D:{dr:1,dc:0}, L:{dr:0,dc:-1}, R:{dr:0,dc:1} };
   const COLOR = { U:'#e23b3b', D:'#3b7de2', L:'#3fae54', R:'#ef7d1a' };
+  const UNI = [38,44,66];                 // 20단계 통일색(짙은 남색/검정 계열)
+  let colorOf = Object.assign({}, COLOR); // 실제로 쓰는 색(레벨에 따라 옅어짐)
+  function updateColors(){ // 도전 10단계부터 서서히 옅어지고 20단계에 전부 같은 색
+    if(!PRO){ colorOf = Object.assign({}, COLOR); return; }
+    const t = Math.max(0, Math.min(1, (curLv-10)/10));
+    if(t<=0){ colorOf = Object.assign({}, COLOR); return; }
+    const mix = (hex)=>{
+      const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+      return 'rgb('+Math.round(r+(UNI[0]-r)*t)+','+Math.round(g+(UNI[1]-g)*t)+','+Math.round(b+(UNI[2]-b)*t)+')';
+    };
+    colorOf = { U:mix(COLOR.U), D:mix(COLOR.D), L:mix(COLOR.L), R:mix(COLOR.R) };
+  }
   const REV = { U:'D', D:'U', L:'R', R:'L' };
 
   let N = 3, cell = 20, S = 0, curLv = 1, effLv = 1; // effLv: 실제 난이도(도전은 +9 상향)
@@ -156,17 +168,38 @@
     if(a.blockUntil>Date.now()){ const m=Math.sin((a.blockUntil-Date.now())/24)*0.12; const dv=DV[a.d]; shx=(-dv.dr)*m; shy=(dv.dc)*m; }
     const hi = Math.min(a.off + a.track.bodyLen, a.track.total);
     const w = windowPts(a.track, a.off, hi); if(!w) return;
-    ctx.strokeStyle=COLOR[a.d]; ctx.lineWidth=cell*0.26; ctx.lineCap='round'; ctx.lineJoin='round';
+    ctx.strokeStyle=colorOf[a.d]; ctx.lineWidth=cell*0.26; ctx.lineCap='round'; ctx.lineJoin='round';
     ctx.beginPath(); w.forEach((p,i)=>{ const X=(p.x+shx)*cell, Y=(p.y+shy)*cell; i?ctx.lineTo(X,Y):ctx.moveTo(X,Y); }); ctx.stroke();
     const f = ptAt(a.track, hi);
-    drawHead((f.x+shx)*cell, (f.y+shy)*cell, f.dx, f.dy, COLOR[a.d]);
+    drawHead((f.x+shx)*cell, (f.y+shy)*cell, f.dx, f.dy, colorOf[a.d]);
   }
-  function draw(){ ctx.clearRect(0,0,S,S); arrows.forEach(a=>{ if(!a.removed) drawArrow(a); }); }
+  // --- 폭죽 ---
+  let parts = [];
+  const SPARK = ['#e23b3b','#3b7de2','#3fae54','#ef7d1a','#f5c518','#9b4fd0','#ec5a92'];
+  function burst(x,y){
+    for(let i=0;i<30;i++){
+      const a=Math.random()*Math.PI*2, sp=(1+Math.random()*3.4)*(S/360);
+      parts.push({ x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp-1.2*(S/360), life:1,
+                   col:SPARK[(Math.random()*SPARK.length)|0], r:(2+Math.random()*2.6)*(S/360) });
+    }
+  }
+  function stepParts(){
+    for(const p of parts){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.09*(S/360); p.vx*=0.99; p.life-=0.018; }
+    parts = parts.filter(p=>p.life>0);
+  }
+  function drawParts(){
+    for(const p of parts){ ctx.globalAlpha=Math.max(0,p.life); ctx.fillStyle=p.col;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,7); ctx.fill(); }
+    ctx.globalAlpha=1;
+  }
+
+  function draw(){ ctx.clearRect(0,0,S,S); arrows.forEach(a=>{ if(!a.removed) drawArrow(a); }); drawParts(); }
 
   function ensureAnim(){ if(!anim) anim=setInterval(step,16); }
   function step(){
     let active=false; const now=Date.now();
     arrows.forEach(a=>{ if(a.sliding){ active=true; a.off+=0.55; if(a.off>=a.maxOff){ a.sliding=false; a.removed=true; } } if(a.blockUntil>now) active=true; });
+    if(parts.length){ stepParts(); active=true; }
     draw();
     if(remaining<=0 && !arrows.some(a=>a.sliding) && !winPending && !busy){ winPending=true; win(); }
     if(!active){ clearInterval(anim); anim=null; }
@@ -193,7 +226,17 @@
     const id=cells[idx(r,c)]; if(id>=0) tap(id);
   });
 
-  function win(){ busy=true; chord(); setTimeout(()=>{ busy=false; winPending=false; newPuzzle(); }, 1300); }
+  function win(){ // 클리어: 폭죽 + 팡파레
+    busy=true; fanfare();
+    let n=0;
+    burst(S*0.5, S*0.42); ensureAnim();
+    const t=setInterval(()=>{
+      burst(S*(0.18+Math.random()*0.64), S*(0.18+Math.random()*0.5));
+      pop(); ensureAnim();
+      if(++n>=5) clearInterval(t);
+    }, 230);
+    setTimeout(()=>{ busy=false; winPending=false; parts=[]; newPuzzle(); }, 2200);
+  }
   function gameOver(){ busy=true; sad(); setTimeout(()=>{ busy=false; newPuzzle(); }, 1300); }
   function newPuzzle(){ lives=MAX_LIVES; renderLives(); winPending=false; generate(); fit(); }
 
@@ -207,6 +250,7 @@
   LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?50:10, onChange:(lv)=>{
     curLv = lv;
     effLv = PRO ? lv + 9 : lv;
+    updateColors();
     N = PRO ? Math.min(4 + effLv, 24) : Math.min(3 + Math.floor((lv-1)*0.7), 9);
     newPuzzle();
   } });
@@ -215,9 +259,24 @@
   let ac;
   function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
   function beep(f,d,type='sine',v=0.1){ const a=audio(),o=a.createOscillator(),g=a.createGain(); o.type=type;o.frequency.value=f;g.gain.value=0.001;o.connect(g).connect(a.destination);o.start(); g.gain.linearRampToValueAtTime(v,a.currentTime+0.02); g.gain.exponentialRampToValueAtTime(0.001,a.currentTime+d); o.stop(a.currentTime+d+0.02); }
-  function good(){ beep(660,0.1,'triangle'); setTimeout(()=>beep(990,0.14,'triangle'),70); }
-  function blip(){ beep(180,0.14,'sine',0.06); }
-  function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.32,'triangle'),i*100)); }
-  function sad(){ [440,392,330].forEach((f,i)=>setTimeout(()=>beep(f,0.28,'sine',0.09),i*160)); }
-  function ping(){ beep(600,0.1,'triangle',0.08); }
+  function good(){ // 탈출: 또렷한 상승음
+    beep(660,0.12,'triangle',0.22); setTimeout(()=>beep(990,0.16,'triangle',0.20),55); setTimeout(()=>beep(1320,0.12,'sine',0.12),115);
+  }
+  function blip(){ beep(150,0.18,'square',0.13); setTimeout(()=>beep(110,0.14,'sine',0.10),50); } // 막힘: 묵직하게
+  function chord(){ [523,659,784,1046].forEach((f,i)=>setTimeout(()=>beep(f,0.34,'triangle',0.18),i*90)); }
+  function sad(){ [440,392,330,262].forEach((f,i)=>setTimeout(()=>beep(f,0.30,'sine',0.15),i*150)); }
+  function ping(){ beep(600,0.1,'triangle',0.12); }
+  function pop(){ // 폭죽 터지는 소리
+    const a=audio(); const o=a.createOscillator(), g=a.createGain();
+    o.type='triangle'; o.frequency.setValueAtTime(900+Math.random()*500, a.currentTime);
+    o.frequency.exponentialRampToValueAtTime(180, a.currentTime+0.22);
+    g.gain.setValueAtTime(0.22, a.currentTime); g.gain.exponentialRampToValueAtTime(0.001, a.currentTime+0.26);
+    o.connect(g).connect(a.destination); o.start(); o.stop(a.currentTime+0.28);
+  }
+  function fanfare(){ // 팡파레
+    const seq=[[523,0],[659,90],[784,180],[1046,270],[988,430],[1046,520]];
+    seq.forEach(([f,t])=> setTimeout(()=>beep(f,0.34,'triangle',0.26), t));
+    setTimeout(()=>{ [523,659,784,1046].forEach(f=>beep(f,0.75,'triangle',0.16)); }, 660);
+    setTimeout(()=>{ [659,784,988,1319].forEach(f=>beep(f,0.85,'triangle',0.15)); }, 1150);
+  }
 })();
