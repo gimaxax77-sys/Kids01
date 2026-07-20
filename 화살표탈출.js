@@ -11,7 +11,7 @@
   const COLOR = { U:'#e23b3b', D:'#3b7de2', L:'#3fae54', R:'#ef7d1a' };
   const REV = { U:'D', D:'U', L:'R', R:'L' };
 
-  let N = 3, cell = 20, S = 0, curLv = 1;
+  let N = 3, cell = 20, S = 0, curLv = 1, effLv = 1; // effLv: 실제 난이도(도전은 +9 상향)
   let cells = [];                        // N*N: 화살표 id 또는 -1
   let mask = [];                         // N*N: 화살표를 놓을 수 있는 칸(판 형상)
   let arrows = [];                       // {id,path,d,track,off,maxOff,sliding,blockUntil,removed}
@@ -35,7 +35,8 @@
     while(path.length < L){
       const [lr,lc]=path[path.length-1];
       const perp = (d==='U'||d==='D') ? shuffle(['L','R']) : shuffle(['U','D']);
-      const opts = Math.random()<0.68 ? [d, ...perp] : [...perp, d];
+      const straight = Math.max(0.42, 0.68 - effLv*0.006); // 레벨 높을수록 더 자주 꺾임
+      const opts = Math.random()<straight ? [d, ...perp] : [...perp, d];
       let moved=false;
       for(const nd of opts){ if(nd===REV[d]) continue; const v=DV[nd]; const nr=lr+v.dr, nc=lc+v.dc;
         if(inb(nr,nc) && mask[idx(nr,nc)] && cells[idx(nr,nc)]<0 && !used.has(idx(nr,nc))){ path.push([nr,nc]); used.add(idx(nr,nc)); d=nd; moved=true; break; } }
@@ -88,7 +89,7 @@
   }
 
   function generate(){
-    const maxLen = Math.min(PRO ? (5 + Math.floor(curLv/3)) : 5, N+2); // 도전은 레벨 오를수록 화살표가 길어짐
+    const maxLen = Math.min(PRO ? (5 + Math.floor(effLv/3)) : 5, N+2); // 도전은 레벨 오를수록 화살표가 길어짐
     mask = makeMask();
     const playable = mask.reduce((n,v)=>n+(v?1:0),0);
     let best=null, bestOcc=-1;
@@ -202,10 +203,11 @@
   if(new URLSearchParams(location.search).get('debug'))
     window.__ae = { get arrows(){return arrows;}, get cells(){return cells;}, get mask(){return mask;}, get N(){return N;}, get S(){return S;}, get cell(){return cell;}, DV, frontClear, tap };
 
-  // 유아: 레벨 1~10 (3×3~9×9) / 도전: 레벨 1~30 (5×5~24×24, 상위는 화살표 길이로 난도 상승)
-  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?30:10, onChange:(lv)=>{
+  // 유아: 레벨 1~10 (3×3~9×9) / 도전: 레벨 1~50 (난이도 10단계 상향: 새 1단계 = 옛 10단계)
+  LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?50:10, onChange:(lv)=>{
     curLv = lv;
-    N = PRO ? Math.min(4 + lv, 24) : Math.min(3 + Math.floor((lv-1)*0.7), 9);
+    effLv = PRO ? lv + 9 : lv;
+    N = PRO ? Math.min(4 + effLv, 24) : Math.min(3 + Math.floor((lv-1)*0.7), 9);
     newPuzzle();
   } });
 
