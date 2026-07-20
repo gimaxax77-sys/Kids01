@@ -52,7 +52,7 @@
 
   function run(){ if(timer) clearInterval(timer); timer = setInterval(tick, speed); }
   function speedUp(){
-    const floor = PRO?70:90, every = PRO?2:3, step = PRO?10:8;
+    const floor = PRO?140:90, every = PRO?2:3, step = PRO?10:8;
     if(speed>floor && score%every===0){ speed = Math.max(floor, speed-step); run(); }
   }
 
@@ -151,11 +151,11 @@
     b.addEventListener('click', ()=>{
       document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
-      baseSpeed = Math.round(+b.dataset.s * (PRO?0.75:1)); speed = baseSpeed; run();
+      baseSpeed = Math.round(+b.dataset.s * (PRO?1.5:1)); speed = baseSpeed; run();
     });
   });
   const defBtn = document.querySelector('#diff [data-s="130"]');
-  if(defBtn){ defBtn.classList.add('on'); baseSpeed = Math.round(130*(PRO?0.75:1)); speed = baseSpeed; }
+  if(defBtn){ defBtn.classList.add('on'); baseSpeed = Math.round(130*(PRO?1.5:1)); speed = baseSpeed; }
 
   // --- 소리 ---
   let ac; function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
