@@ -11,8 +11,8 @@ window.LevelStepper = function(opts){
   var num = document.createElement('span');
   num.style.cssText = 'min-width:2.4em;text-align:center;font-weight:800;color:#6b5b39;font-size:min(5.5vw,30px);align-self:center;';
   function apply(fire){ num.textContent = 'Lv ' + lv; try{ localStorage.setItem(key, lv); }catch(e){} if(fire) opts.onChange(lv); }
-  minus.addEventListener('click', function(){ if(lv>min){ lv--; apply(true); } });
-  plus.addEventListener('click', function(){ if(lv<max){ lv++; apply(true); } });
+  minus.addEventListener('pointerdown', function(){ if(lv>min){ lv--; apply(true); } });
+  plus.addEventListener('pointerdown', function(){ if(lv<max){ lv++; apply(true); } });
   el.appendChild(minus); el.appendChild(num); el.appendChild(plus);
   apply(false);
   opts.onChange(lv); // 초기 적용

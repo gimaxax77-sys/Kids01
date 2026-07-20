@@ -18,7 +18,9 @@
     const mid = document.getElementById('mid');
     const w = mid.clientWidth, h = mid.clientHeight;
     if(!w || !h){ requestAnimationFrame(layout); return; }
-    const size = Math.min(w, h);
+    const cs = getComputedStyle(mid); // 안쪽 여백 제외(가로모드 잘림 방지)
+    const size = Math.min(w - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight),
+                          h - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom));
     cell = Math.floor(size / N);
     const dpr = Math.min(window.devicePixelRatio||1, 2);
     cv.style.width = cv.style.height = (cell*N) + 'px';
@@ -146,9 +148,9 @@
     if(k){ e.preventDefault(); setDir(k[0],k[1]); }
   });
 
-  document.getElementById('reset').addEventListener('click', newGame);
+  document.getElementById('reset').addEventListener('pointerdown', newGame);
   document.querySelectorAll('#diff button').forEach(b=>{
-    b.addEventListener('click', ()=>{
+    b.addEventListener('pointerdown', ()=>{
       document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
       baseSpeed = Math.round(+b.dataset.s * (PRO?1.5:1)); speed = baseSpeed; run();

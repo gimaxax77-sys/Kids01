@@ -62,7 +62,7 @@ function win(){
   chord(); setTimeout(newGame, 1600);
 }
 
-document.getElementById('new').addEventListener('click', ()=>{ newGame(); ping(); });
+document.getElementById('new').addEventListener('pointerdown', ()=>{ newGame(); ping(); });
 // 레벨 1~10 → 짝 수 3~12
 LevelStepper({ key:'lv_match', max:10, onChange:(lv)=>{ pairs = Math.min(2+lv, POOL.length); newGame(); } });
 

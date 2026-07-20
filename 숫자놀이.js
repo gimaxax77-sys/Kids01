@@ -30,7 +30,7 @@ function count(b){
   if(counted===total){ setTimeout(()=>{ bignum.classList.add('big'); chord(); }, 200); setTimeout(newRound, 1700); }
 }
 
-document.getElementById('new').addEventListener('click', ()=>{ newRound(); ping(); });
+document.getElementById('new').addEventListener('pointerdown', ()=>{ newRound(); ping(); });
 // 레벨 1~10 → 최대 개수 2~20
 LevelStepper({ key:'lv_count', max:10, onChange:(lv)=>{ maxN = lv*2; bignum.classList.remove('big'); newRound(); } });
 

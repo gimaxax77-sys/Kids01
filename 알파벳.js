@@ -10,7 +10,11 @@ let guidePts=[], covered=[], coveredN=0, drawing=false, last=null, done=false;
 const canvas=document.getElementById('art');
 const ctx=canvas.getContext('2d',{willReadFrequently:true});
 canvas.width=canvas.height=RES;
-function fit(){ const mid=document.getElementById('mid'); const s=Math.min(mid.clientWidth,mid.clientHeight)*0.95; canvas.style.width=canvas.style.height=s+'px'; }
+function fit(){ // 안쪽 여백 제외한 실제 영역 기준(가로모드에서 화면 밖으로 안 넘치게)
+  const mid=document.getElementById("mid"), cs=getComputedStyle(mid);
+  const aw=mid.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const ah=mid.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  const s=Math.floor(Math.min(aw,ah)); canvas.style.width=canvas.style.height=s+"px"; }
 
 function loadChar(){
   const mid=document.getElementById('mid');
@@ -48,11 +52,11 @@ function end(){ drawing=false; last=null; } canvas.addEventListener('pointerup',
 function complete(){ const ch=SETS[setKey][idx%SETS[setKey].length]; speak(ch.toUpperCase()); chord(); setTimeout(()=>{ idx++; loadChar(); },1600); }
 function speak(t){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(t); u.lang='en-US'; u.rate=0.8; speechSynthesis.speak(u); }catch(e){} }
 
-document.getElementById('next').addEventListener('click',()=>{ idx++; loadChar(); ping(); });
-document.getElementById('reset').addEventListener('click',()=>{ loadChar(); ping(); });
+document.getElementById('next').addEventListener('pointerdown',()=>{ idx++; loadChar(); ping(); });
+document.getElementById('reset').addEventListener('pointerdown',()=>{ loadChar(); ping(); });
 document.querySelectorAll('#diff button').forEach(btn=>{
   if(btn.dataset.k===setKey) btn.classList.add('on');
-  btn.addEventListener('click',()=>{ setKey=btn.dataset.k; idx=0; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); loadChar(); ping(); });
+  btn.addEventListener('pointerdown',()=>{ setKey=btn.dataset.k; idx=0; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); loadChar(); ping(); });
 });
 window.addEventListener('resize', fit);
 

@@ -5,7 +5,11 @@ const canvas = document.getElementById('art');
 const ctx = canvas.getContext('2d');
 let RES = 560, cell = 0, pad = 14;
 canvas.width = canvas.height = RES;
-function fit(){ const mid=document.getElementById('mid'); const s=Math.min(mid.clientWidth,mid.clientHeight)*0.95; canvas.style.width=canvas.style.height=s+'px'; }
+function fit(){ // 안쪽 여백 제외한 실제 영역 기준(가로모드에서 화면 밖으로 안 넘치게)
+  const mid=document.getElementById("mid"), cs=getComputedStyle(mid);
+  const aw=mid.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const ah=mid.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  const s=Math.floor(Math.min(aw,ah)); canvas.style.width=canvas.style.height=s+"px"; }
 const idx=(r,c)=>r*size+c;
 
 function newMaze(){
@@ -68,13 +72,30 @@ function move(e){
   const x=(e.clientX-r.left)/r.width*RES, y=(e.clientY-r.top)/r.height*RES;
   const c=Math.floor((x-pad)/cell), rr=Math.floor((y-pad)/cell);
   if(c<0||rr<0||c>=size||rr>=size) return;
-  const target=idx(rr,c), cur=idx(ball.r,ball.c);
-  if(target===cur) return;
-  if(open(cur,target)){
-    ball={r:rr,c:c};
-    if(trail.length>1 && trail[trail.length-2]===target) trail.pop(); else trail.push(target);
-    audio(); step();
-    draw();
+  // 손가락이 빨라 여러 칸 건너뛰어도 한 칸씩 따라가도록(반응성)
+  let moved=false;
+  for(let guard=0; guard<40; guard++){
+    if(ball.r===rr && ball.c===c) break;
+    const dr=rr-ball.r, dc=c-ball.c;
+    const tries = Math.abs(dc)>=Math.abs(dr)
+      ? [[0,Math.sign(dc)],[Math.sign(dr),0]]
+      : [[Math.sign(dr),0],[0,Math.sign(dc)]];
+    let stepped=false;
+    for(const [sr,sc] of tries){
+      if(!sr && !sc) continue;
+      const nr=ball.r+sr, nc=ball.c+sc;
+      if(nr<0||nc<0||nr>=size||nc>=size) continue;
+      const cur=idx(ball.r,ball.c), nxt=idx(nr,nc);
+      if(!open(cur,nxt)) continue;
+      ball={r:nr,c:nc};
+      if(trail.length>1 && trail[trail.length-2]===nxt) trail.pop(); else trail.push(nxt);
+      stepped=true; moved=true; break;
+    }
+    if(!stepped) break; // 벽에 막히면 중단
+    if(ball.r===size-1 && ball.c===size-1) break;
+  }
+  if(moved){
+    audio(); step(); draw();
     if(ball.r===size-1 && ball.c===size-1){ win=true; chord(); setTimeout(newMaze,1600); }
   }
 }
@@ -84,7 +105,7 @@ canvas.addEventListener('pointermove',(e)=>{ if(drawing) move(e); });
 canvas.addEventListener('pointerup',()=>drawing=false);
 canvas.addEventListener('pointercancel',()=>drawing=false);
 
-document.getElementById('new').addEventListener('click',()=>{ newMaze(); ping(); });
+document.getElementById('new').addEventListener('pointerdown',()=>{ newMaze(); ping(); });
 // 레벨 1~10 → 미로 칸 수 5~14
 LevelStepper({ key:'lv_maze', max:10, onChange:(lv)=>{ size = 4+lv; newMaze(); } });
 window.addEventListener('resize', ()=>{ fit(); draw(); });

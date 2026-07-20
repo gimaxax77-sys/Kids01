@@ -72,13 +72,13 @@ function run(){
 function win(){ bot.classList.add('yay'); chord(); setTimeout(newLevel, 1500); }
 function miss(){ blip(); setTimeout(()=>{ pos={...start}; placeBot(); queue=[]; renderQueue(); }, 600); }
 
-document.getElementById('up').addEventListener('click',()=>add('U'));
-document.getElementById('down').addEventListener('click',()=>add('D'));
-document.getElementById('left').addEventListener('click',()=>add('L'));
-document.getElementById('right').addEventListener('click',()=>add('R'));
-document.getElementById('run').addEventListener('click',run);
-document.getElementById('clear').addEventListener('click',()=>{ if(running) return; queue=[]; renderQueue(); pos={...start}; placeBot(); ping(); });
-document.getElementById('new').addEventListener('click',()=>{ newLevel(); ping(); });
+document.getElementById('up').addEventListener('pointerdown',()=>add('U'));
+document.getElementById('down').addEventListener('pointerdown',()=>add('D'));
+document.getElementById('left').addEventListener('pointerdown',()=>add('L'));
+document.getElementById('right').addEventListener('pointerdown',()=>add('R'));
+document.getElementById('run').addEventListener('pointerdown',run);
+document.getElementById('clear').addEventListener('pointerdown',()=>{ if(running) return; queue=[]; renderQueue(); pos={...start}; placeBot(); ping(); });
+document.getElementById('new').addEventListener('pointerdown',()=>{ newLevel(); ping(); });
 // 레벨 1~10 → 벽 수 2~11 (도착 가능 보장)
 LevelStepper({ key:'lv_code', max:10, onChange:(lv)=>{ walls = 1+lv; newLevel(); } });
 window.addEventListener('resize', ()=>{ buildGrid(); });

@@ -31,8 +31,8 @@ function pick(btn,v){
   else { btn.classList.remove('shake'); void btn.offsetWidth; btn.classList.add('shake'); blip(); }
 }
 
-document.getElementById('op').addEventListener('click',(e)=>{ op = op==='+'?'-':'+'; e.currentTarget.textContent = op==='+'?'➕':'➖'; newRound(); ping(); });
-document.getElementById('new').addEventListener('click',()=>{ newRound(); ping(); });
+document.getElementById('op').addEventListener('pointerdown',(e)=>{ op = op==='+'?'-':'+'; e.currentTarget.textContent = op==='+'?'➕':'➖'; newRound(); ping(); });
+document.getElementById('new').addEventListener('pointerdown',()=>{ newRound(); ping(); });
 // 레벨 1~10 → 최대 수 4~13
 LevelStepper({ key:'lv_math', max:10, onChange:(lv)=>{ maxN = 3+lv; newRound(); } });
 

@@ -83,7 +83,7 @@ function playDrum(i){
 }
 
 // 악기 바꾸기
-document.getElementById('inst').addEventListener('click', () => {
+document.getElementById('inst').addEventListener('pointerdown', () => {
   instIdx = (instIdx + 1) % INSTRUMENTS.length;
   document.getElementById('inst').textContent = INSTRUMENTS[instIdx].icon;
   document.getElementById('instname').textContent = INSTRUMENTS[instIdx].name;

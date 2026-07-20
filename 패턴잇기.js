@@ -36,7 +36,7 @@ function pick(b, c){
   } else { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); blip(); }
 }
 
-document.getElementById('new').addEventListener('click', ()=>{ newRound(); ping(); });
+document.getElementById('new').addEventListener('pointerdown', ()=>{ newRound(); ping(); });
 // 레벨 1~10 → 규칙 길이 2~8
 LevelStepper({ key:'lv_pattern', max:10, onChange:(lv)=>{ unitLen = Math.min(1+lv, 8); newRound(); } });
 

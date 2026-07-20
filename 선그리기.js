@@ -21,7 +21,11 @@ const canvas = document.getElementById('art');
 const ctx = canvas.getContext('2d');
 canvas.width = canvas.height = RES;
 
-function fit(){ const mid=document.getElementById('mid'); const s=Math.min(mid.clientWidth, mid.clientHeight)*0.95; canvas.style.width=canvas.style.height=s+'px'; }
+function fit(){ // 안쪽 여백 제외한 실제 영역 기준(가로모드에서 화면 밖으로 안 넘치게)
+  const mid=document.getElementById("mid"), cs=getComputedStyle(mid);
+  const aw=mid.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const ah=mid.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  const s=Math.floor(Math.min(aw,ah)); canvas.style.width=canvas.style.height=s+"px"; }
 
 function loadShape(){
   const mid=document.getElementById('mid');
@@ -60,8 +64,8 @@ function end(){ drawing=false; last=null; } canvas.addEventListener('pointerup',
 
 function complete(){ chord(); setTimeout(()=>{ shapeIdx++; loadShape(); }, 1300); }
 
-document.getElementById('next').addEventListener('click', ()=>{ shapeIdx++; loadShape(); ping(); });
-document.getElementById('reset').addEventListener('click', ()=>{ loadShape(); ping(); });
+document.getElementById('next').addEventListener('pointerdown', ()=>{ shapeIdx++; loadShape(); ping(); });
+document.getElementById('reset').addEventListener('pointerdown', ()=>{ loadShape(); ping(); });
 window.addEventListener('resize', fit);
 
 // --- 소리 ---

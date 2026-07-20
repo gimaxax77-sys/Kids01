@@ -39,8 +39,8 @@ function pick(b,t){
   else { b.classList.remove('shake'); void b.offsetWidth; b.classList.add('shake'); blip(); }
 }
 
-document.getElementById('mode').addEventListener('click',(e)=>{ half=!half; e.currentTarget.textContent = half?'🕧':'🕐'; newRound(); ping(); });
-document.getElementById('new').addEventListener('click',()=>{ newRound(); ping(); });
+document.getElementById('mode').addEventListener('pointerdown',(e)=>{ half=!half; e.currentTarget.textContent = half?'🕧':'🕐'; newRound(); ping(); });
+document.getElementById('new').addEventListener('pointerdown',()=>{ newRound(); ping(); });
 
 // --- 소리 ---
 let ac;

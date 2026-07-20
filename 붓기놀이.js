@@ -62,8 +62,8 @@ function win(){
 }
 
 // 컨트롤
-document.getElementById('mode').addEventListener('click', (e)=>{ mode = mode==='water'?'sand':'water'; e.currentTarget.textContent = mode==='water'?'💧':'🏖️'; render(); ping(); });
-document.getElementById('new').addEventListener('click', ()=>{ newPuzzle(); ping(); });
+document.getElementById('mode').addEventListener('pointerdown', (e)=>{ mode = mode==='water'?'sand':'water'; e.currentTarget.textContent = mode==='water'?'💧':'🏖️'; render(); ping(); });
+document.getElementById('new').addEventListener('pointerdown', ()=>{ newPuzzle(); ping(); });
 // 레벨 1~10 → 색 수 2~10 (빈 튜브 2개 여유)
 LevelStepper({ key:'lv_pour', max:10, onChange:(lv)=>{ nColors = Math.min(1+lv, COLORS.length); newPuzzle(); } });
 

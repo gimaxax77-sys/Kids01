@@ -218,7 +218,7 @@
     }
   }
 
-  cv.addEventListener('click', (e)=>{
+  cv.addEventListener('pointerdown', (e)=>{
     if(busy || !S) return;
     const rect=cv.getBoundingClientRect();
     const x=(e.clientX-rect.left)/rect.width*S, y=(e.clientY-rect.top)/rect.height*S;
@@ -240,7 +240,7 @@
   function gameOver(){ busy=true; sad(); setTimeout(()=>{ busy=false; newPuzzle(); }, 1300); }
   function newPuzzle(){ lives=MAX_LIVES; renderLives(); winPending=false; generate(); fit(); }
 
-  document.getElementById('new').addEventListener('click', ()=>{ if(!busy){ newPuzzle(); ping(); } });
+  document.getElementById('new').addEventListener('pointerdown', ()=>{ if(!busy){ newPuzzle(); ping(); } });
   window.addEventListener('resize', fit);
 
   if(new URLSearchParams(location.search).get('debug'))

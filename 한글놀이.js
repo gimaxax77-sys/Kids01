@@ -44,7 +44,11 @@ let strokesN=[], guidePts=[], covered=[], coveredN=0, drawing=false, last=null, 
 const canvas=document.getElementById('art');
 const ctx=canvas.getContext('2d',{willReadFrequently:true});
 canvas.width=canvas.height=RES;
-function fit(){ const mid=document.getElementById('mid'); const s=Math.min(mid.clientWidth,mid.clientHeight)*0.95; canvas.style.width=canvas.style.height=s+'px'; }
+function fit(){ // 안쪽 여백 제외한 실제 영역 기준(가로모드에서 화면 밖으로 안 넘치게)
+  const mid=document.getElementById("mid"), cs=getComputedStyle(mid);
+  const aw=mid.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight);
+  const ah=mid.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom);
+  const s=Math.floor(Math.min(aw,ah)); canvas.style.width=canvas.style.height=s+"px"; }
 
 // 획을 박스에 매핑
 function mapStrokes(strokes, box){ return strokes.map(st=> st.map(([x,y])=> [box[0]+x*(box[2]-box[0]), box[1]+y*(box[3]-box[1])])); }
@@ -122,11 +126,11 @@ function complete(){
 }
 function speak(text){ try{ speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(text); u.lang='ko-KR'; u.rate=0.8; u.pitch=1.15; speechSynthesis.speak(u); }catch(e){} }
 
-document.getElementById('next').addEventListener('click',()=>{ idx++; loadChar(); ping(); });
-document.getElementById('reset').addEventListener('click',()=>{ loadChar(); ping(); });
+document.getElementById('next').addEventListener('pointerdown',()=>{ idx++; loadChar(); ping(); });
+document.getElementById('reset').addEventListener('pointerdown',()=>{ loadChar(); ping(); });
 document.querySelectorAll('#diff button').forEach(btn=>{
   if(btn.dataset.k===setKey) btn.classList.add('on');
-  btn.addEventListener('click',()=>{ setKey=btn.dataset.k; idx=0; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); loadChar(); ping(); });
+  btn.addEventListener('pointerdown',()=>{ setKey=btn.dataset.k; idx=0; document.querySelectorAll('#diff button').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); loadChar(); ping(); });
 });
 window.addEventListener('resize', fit);
 

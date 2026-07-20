@@ -38,7 +38,7 @@ function markFound(i){ [gl,gr].forEach(g=>{ const c=g.querySelector('.cell[data-
 function updateStatus(){ status.textContent = '🔍 ' + found.size + ' / ' + diffN; }
 function winRound(){ win=true; [...document.querySelectorAll('.cell.found')].forEach((el,k)=> setTimeout(()=>{ el.classList.remove('cheer'); void el.offsetWidth; el.classList.add('cheer'); }, k*80)); chord(); setTimeout(newRound, 1600); }
 
-document.getElementById('new').addEventListener('click',()=>{ newRound(); ping(); });
+document.getElementById('new').addEventListener('pointerdown',()=>{ newRound(); ping(); });
 // 레벨 1~10 → 다른 곳 2~11 (16칸 격자)
 LevelStepper({ key:'lv_spot', max:10, onChange:(lv)=>{ diffN = Math.min(1+lv, COLS*ROWS-1); newRound(); } });
 
