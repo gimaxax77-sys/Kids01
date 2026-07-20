@@ -120,11 +120,23 @@
     requestAnimationFrame(frame);
   }
 
-  function setDir(x,y){ if(x===-dir.x && y===-dir.y) return; nextDir={x,y}; }
+  function setDir(x,y){
+    if(x===-dir.x && y===-dir.y) return;          // 반대 방향 금지
+    if(x===dir.x && y===dir.y) return;            // 같은 방향이면 무시
+    nextDir = {x,y};
+    // 반응성: 이미 한 칸의 절반 이상 지났으면 기다리지 않고 즉시 진행
+    if(!paused && performance.now()-lastTick >= speed*0.3){ tick(); run(); }
+  }
 
   let sx=0, sy=0;
   cv.addEventListener('pointerdown', e=>{ sx=e.clientX; sy=e.clientY; });
-  cv.addEventListener('pointerup', e=>{
+  cv.addEventListener('pointermove', e=>{        // 손 떼기 전에 바로 인식 → 훨씬 빠른 반응
+    const dx=e.clientX-sx, dy=e.clientY-sy;
+    if(Math.abs(dx)<14 && Math.abs(dy)<14) return;
+    if(Math.abs(dx)>Math.abs(dy)) setDir(dx>0?1:-1,0); else setDir(0,dy>0?1:-1);
+    sx=e.clientX; sy=e.clientY;                   // 기준점 갱신 → 한 번의 드래그로 연속 조작
+  });
+  cv.addEventListener('pointerup', e=>{           // 짧은 플릭 보완
     const dx=e.clientX-sx, dy=e.clientY-sy;
     if(Math.abs(dx)<12 && Math.abs(dy)<12) return;
     if(Math.abs(dx)>Math.abs(dy)) setDir(dx>0?1:-1,0); else setDir(0,dy>0?1:-1);
@@ -139,11 +151,11 @@
     b.addEventListener('click', ()=>{
       document.querySelectorAll('#diff button').forEach(x=>x.classList.remove('on'));
       b.classList.add('on');
-      baseSpeed = Math.round(+b.dataset.s * (PRO?0.7:1)); speed = baseSpeed; run();
+      baseSpeed = Math.round(+b.dataset.s * (PRO?0.75:1)); speed = baseSpeed; run();
     });
   });
-  const defBtn = document.querySelector('#diff [data-s="180"]');
-  if(defBtn){ defBtn.classList.add('on'); baseSpeed = Math.round(180*(PRO?0.7:1)); speed = baseSpeed; }
+  const defBtn = document.querySelector('#diff [data-s="130"]');
+  if(defBtn){ defBtn.classList.add('on'); baseSpeed = Math.round(130*(PRO?0.75:1)); speed = baseSpeed; }
 
   // --- 소리 ---
   let ac; function audio(){ if(!ac) ac=new (window.AudioContext||window.webkitAudioContext)(); if(ac.state==='suspended') ac.resume(); return ac; }
