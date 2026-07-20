@@ -13,6 +13,7 @@
 
   let N = 3, cell = 20, S = 0, curLv = 1;
   let cells = [];                        // N*N: 화살표 id 또는 -1
+  let mask = [];                         // N*N: 화살표를 놓을 수 있는 칸(판 형상)
   let arrows = [];                       // {id,path,d,track,off,maxOff,sliding,blockUntil,removed}
   let remaining = 0, busy = false, lives = MAX_LIVES, anim = null, winPending = false;
 
@@ -24,21 +25,23 @@
   function frontClear(hr,hc,d){ const v=DV[d]; let r=hr+v.dr, c=hc+v.dc; while(inb(r,c)){ if(cells[idx(r,c)]>=0) return false; r+=v.dr; c+=v.dc; } return true; }
 
   // 자기 회피 경로(꺾임 허용) 하나 만들기
+  const MINLEN = 3; // 최소 3칸짜리부터 배치
   function randPath(maxLen, sr, sc){
     if(sr===undefined){ sr=(Math.random()*N)|0; sc=(Math.random()*N)|0; }
-    if(cells[idx(sr,sc)]>=0) return null;
+    if(!mask[idx(sr,sc)] || cells[idx(sr,sc)]>=0) return null;
     let d = ['U','D','L','R'][(Math.random()*4)|0];
     const path=[[sr,sc]]; const used=new Set([idx(sr,sc)]);
-    const L = 1 + ((Math.random()*maxLen)|0);
+    const L = MINLEN + ((Math.random()*Math.max(1, maxLen-MINLEN+1))|0);
     while(path.length < L){
       const [lr,lc]=path[path.length-1];
       const perp = (d==='U'||d==='D') ? shuffle(['L','R']) : shuffle(['U','D']);
       const opts = Math.random()<0.68 ? [d, ...perp] : [...perp, d];
       let moved=false;
       for(const nd of opts){ if(nd===REV[d]) continue; const v=DV[nd]; const nr=lr+v.dr, nc=lc+v.dc;
-        if(inb(nr,nc) && cells[idx(nr,nc)]<0 && !used.has(idx(nr,nc))){ path.push([nr,nc]); used.add(idx(nr,nc)); d=nd; moved=true; break; } }
+        if(inb(nr,nc) && mask[idx(nr,nc)] && cells[idx(nr,nc)]<0 && !used.has(idx(nr,nc))){ path.push([nr,nc]); used.add(idx(nr,nc)); d=nd; moved=true; break; } }
       if(!moved) break;
     }
+    if(path.length < MINLEN) return null; // 1~2칸짜리는 버림
     return { path, d }; // d = 마지막 이동 방향(머리 방향)
   }
 
@@ -63,13 +66,36 @@
     if(!frontClear(head[0],head[1],d)){ path.forEach(([r,c])=> cells[idx(r,c)]=-1); return false; }
     arrows.push(makeArrow(id, path, d)); return true;
   }
+  // 판 형상(사각형 외 여러 모양). 작은 격자는 사각형만
+  function makeMask(){
+    const m = new Array(N*N).fill(true);
+    if(N < 7) return m;
+    const kinds = ['square','circle','diamond','cross','octagon','steps'];
+    const kind = kinds[(Math.random()*kinds.length)|0];
+    if(kind === 'square') return m;
+    const mid = (N-1)/2;
+    for(let r=0;r<N;r++) for(let c=0;c<N;c++){
+      const dr=r-mid, dc=c-mid; let ok=true;
+      if(kind==='circle')  ok = (dr*dr+dc*dc) <= (mid+0.35)*(mid+0.35);
+      if(kind==='diamond') ok = (Math.abs(dr)+Math.abs(dc)) <= mid+0.5;
+      if(kind==='cross'){ const w=Math.max(1, Math.round(N/3)); ok = Math.abs(dr)<=w/2 || Math.abs(dc)<=w/2; }
+      if(kind==='octagon'){ const k=Math.max(1, Math.floor(N/4));
+        ok = (r+c>=k) && (r+(N-1-c)>=k) && ((N-1-r)+c>=k) && ((N-1-r)+(N-1-c)>=k); }
+      if(kind==='steps')   ok = c <= N-1 - Math.floor(r/2); // 계단 모양
+      if(!ok) m[idx(r,c)] = false;
+    }
+    return m;
+  }
+
   function generate(){
     const maxLen = Math.min(PRO ? (5 + Math.floor(curLv/3)) : 5, N+2); // 도전은 레벨 오를수록 화살표가 길어짐
+    mask = makeMask();
+    const playable = mask.reduce((n,v)=>n+(v?1:0),0);
     let best=null, bestOcc=-1;
     for(let att=0; att<8; att++){
       cells = new Array(N*N).fill(-1); arrows = [];
       // 안쪽(가장자리에서 먼 칸)부터 채움 → 바깥쪽 통로가 비어 있어 촘촘히 참
-      const order = shuffle([...Array(N*N).keys()]).sort((a,b)=>{
+      const order = shuffle([...Array(N*N).keys()]).filter(i=>mask[i]).sort((a,b)=>{
         const bd=i=>{ const r=(i/N)|0,c=i%N; return Math.min(r,c,N-1-r,N-1-c); };
         return bd(b)-bd(a);
       });
@@ -82,7 +108,7 @@
       }
       const occ = cells.filter(x=>x>=0).length;
       if(occ > bestOcc){ bestOcc=occ; best={ cells:cells.slice(), arrows:arrows.slice() }; }
-      if(occ === N*N) break; // 완전히 꽉 참
+      if(occ === playable) break; // 형상 전체가 꽉 참
     }
     cells = best.cells; arrows = best.arrows; remaining = arrows.length;
   }
@@ -174,7 +200,7 @@
   window.addEventListener('resize', fit);
 
   if(new URLSearchParams(location.search).get('debug'))
-    window.__ae = { get arrows(){return arrows;}, get cells(){return cells;}, get N(){return N;}, get S(){return S;}, get cell(){return cell;}, DV, frontClear, tap };
+    window.__ae = { get arrows(){return arrows;}, get cells(){return cells;}, get mask(){return mask;}, get N(){return N;}, get S(){return S;}, get cell(){return cell;}, DV, frontClear, tap };
 
   // 유아: 레벨 1~10 (3×3~7×7) / 도전: 레벨 1~30 (5×5~18×18, 상위는 화살표 길이로 난도 상승)
   LevelStepper({ key: PRO?'lv_arrowpro':'lv_arrow', max: PRO?30:10, onChange:(lv)=>{
